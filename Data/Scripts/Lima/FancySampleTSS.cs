@@ -8,7 +8,7 @@ using VRage.ModAPI;
 using VRage.Utils;
 using VRageMath;
 
-namespace Lima
+namespace Lima2
 {
   [MyTextSurfaceScript("FancyUI_Sample", "FancyUI Sample")]
   public class FancySampleTSS : MyTSSCommon
@@ -36,7 +36,7 @@ namespace Lima
 
     public void Init()
     {
-      if (!SampleSession.Instance.Api.IsReady)
+      if (!GameSession.Instance.Api.IsReady)
         return;
 
       if (_init)
@@ -58,7 +58,7 @@ namespace Lima
     {
       base.Dispose();
 
-      _app?.Dispose();
+      _app?.ForceDispose();
       _terminalBlock.OnMarkForClose -= BlockMarkedForClose;
     }
 
