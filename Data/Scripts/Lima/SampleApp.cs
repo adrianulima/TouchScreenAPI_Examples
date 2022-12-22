@@ -32,7 +32,7 @@ namespace Lima2
       // col2.SetScale(new Vector2(1, 1));
       // col2.SetBorder(new Vector4(2));
 
-      var header1 = new FancyLabel("Column 1\nTeste", 0.6f);
+      var header1 = new FancyLabel("Column 1\nMultiline Test", 0.6f);
 
       var separator1 = new FancySeparator();
 
@@ -58,6 +58,8 @@ namespace Lima2
       labelProgressBar.SetAlignment(VRage.Game.GUI.TextPanel.TextAlignment.LEFT);
       labelProgressBar.SetMargin(Vector4.UnitY * 8);
       var progressBar = new FancyProgressBar(-100, 100);
+      progressBar.SetLabel("50%");
+      progressBar.SetLabelAlignment(VRage.Game.GUI.TextPanel.TextAlignment.RIGHT);
 
       var labelSelector = new FancyLabel("Color");
       labelSelector.SetMargin(Vector4.UnitY * 8);
