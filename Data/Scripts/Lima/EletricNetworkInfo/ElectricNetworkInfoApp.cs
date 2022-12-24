@@ -53,7 +53,7 @@ namespace Lima2
 
       // Chart Panel
       Charts = new ChartView();
-      Charts.SetChartContainerBorder(GetTheme().GetColorMainDarker(20));
+      Charts.SetChartColors(GetTheme().GetColorMainDarker(20), GetTheme().GetColorMain());
       batteryAndChartPanel.AddChild(Charts);
 
       // Battery Storage bar
@@ -114,6 +114,7 @@ namespace Lima2
         entity.SetBgColor(new Color(color * 0.3f, 1));
         ProductionList.AddItem(entity);
       }
+      ProductionList.FillLastView();
 
       ConsumptionList.SetScrollViewBgColor(new Color(color * 0.05f, 1));
       ConsumptionList.RemoveAllChildren();
@@ -130,8 +131,9 @@ namespace Lima2
         entity.SetBgColor(new Color(color * 0.3f, 1));
         ConsumptionList.AddItem(entity);
       }
+      ConsumptionList.FillLastView();
 
-      Charts.SetChartContainerBorder(GetTheme().GetColorMainDarker(20));
+      Charts.SetChartColors(GetTheme().GetColorMainDarker(20), GetTheme().GetColorMain());
     }
 
     public void Dispose()
@@ -141,21 +143,21 @@ namespace Lima2
       ConsumptionList.Dispose();
     }
 
-    public static string PowerFormat(float MW)
+    public static string PowerFormat(float MW, string decimals = "0.##")
     {
       if (MW >= 1000000000000)
         return $"{MW.ToString("E2")} MW";
       if (MW >= 1000000000)
-        return $"{(MW / 1000000000).ToString("0.##")} PW";
+        return $"{(MW / 1000000000).ToString(decimals)} PW";
       if (MW >= 1000000)
-        return $"{(MW / 1000000).ToString("0.##")} TW";
+        return $"{(MW / 1000000).ToString(decimals)} TW";
       if (MW >= 1000)
-        return $"{(MW / 1000).ToString("0.##")} GW";
+        return $"{(MW / 1000).ToString(decimals)} GW";
       if (MW >= 1)
-        return $"{MW.ToString("0.##")} MW";
+        return $"{MW.ToString(decimals)} MW";
       if (MW >= 0.001)
-        return $"{(MW * 1000f).ToString("0.##")} kW";
-      return $"{(MW * 1000000f).ToString("0.##")} W";
+        return $"{(MW * 1000f).ToString(decimals)} kW";
+      return $"{(MW * 1000000f).ToString(decimals)} W";
     }
 
     public static string PowerStorageFormat(float MWh)

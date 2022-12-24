@@ -27,7 +27,8 @@ namespace Lima2
         Type = SpriteType.TEXTURE,
         Data = _image,
         RotationOrScale = 0,
-        Size = _size,
+        Color = GetApp().GetTheme().GetColorWhite(),
+        Size = _size * GetApp().GetTheme().GetScale(),
         Position = GetPosition()
       };
 

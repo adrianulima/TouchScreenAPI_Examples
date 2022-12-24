@@ -61,20 +61,31 @@ namespace Lima2
       _odd = 0;
     }
 
+    public void FillLastView()
+    {
+      var view = _views.Last<FancyView>();
+      var childCount = view.GetChildren().Count;
+      if (childCount < _cols)
+      {
+        var fill = new FancyView();
+        view.AddChild(fill);
+        fill.SetScale(new Vector2(_cols - childCount, 0));
+      }
+    }
+
     public void AddItem(EntityItem item)
     {
       if (_odd % _cols != 0)
       {
         var view = _views.Last<FancyView>();
         view.AddChild(item);
-        view.SetScale(new Vector2(1, 0));
       }
       else
       {
         var view = new FancyView(ViewDirection.Row);
         view.SetGap(2);
         view.AddChild(item);
-        view.SetScale(new Vector2(1 / _cols, 0));
+        view.SetScale(new Vector2(1, 0));
         view.SetPixels(new Vector2(0, 34));
         _scrollView.AddChild(view);
         _views.Add(view);

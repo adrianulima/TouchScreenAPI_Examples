@@ -20,8 +20,8 @@ namespace Lima2
 {
   public class ElectricNetworkManager
   {
-    private IMyCubeBlock _block;
     private bool _init = false;
+    private IMyCubeBlock _lcdBlock;
 
     private MyDefinitionId _elec = MyResourceDistributorComponent.ElectricityId;
 
@@ -62,39 +62,47 @@ namespace Lima2
       _thrustersList.Clear();
       ProductionBlocks.Clear();
       ConsumptionBlocks.Clear();
+
+      foreach (MyCubeGrid grid in _grids)
+      {
+        grid.OnBlockAdded -= OnBlockAddedToGrid;
+        grid.OnBlockRemoved -= OnBlockRemovedFromGrid;
+        grid.OnConnectionChanged -= OnConnectGrid;
+      }
     }
 
     public void Init(IMyCubeBlock lcdBlock)
     {
       _init = true;
-      _block = lcdBlock;
+      _lcdBlock = lcdBlock;
 
-      MyAPIGateway.GridGroups.GetGroup(lcdBlock.CubeGrid, GridLinkTypeEnum.Electrical, _grids);
+      HandleGrid(_lcdBlock.CubeGrid);
+    }
+
+    private void HandleGrid(IMyCubeGrid cubeGrid)
+    {
+      MyAPIGateway.GridGroups.GetGroup(cubeGrid, GridLinkTypeEnum.Physical, _grids);
 
       foreach (MyCubeGrid grid in _grids)
       {
+        grid.OnBlockAdded -= OnBlockAddedToGrid;
+        grid.OnBlockRemoved -= OnBlockRemovedFromGrid;
+        grid.OnConnectionChanged -= OnConnectGrid;
         grid.OnBlockAdded += OnBlockAddedToGrid;
         grid.OnBlockRemoved += OnBlockRemovedFromGrid;
+        grid.OnConnectionChanged += OnConnectGrid;
 
         foreach (MyCubeBlock block in grid.GetFatBlocks())
         {
           HandleBlock(block);
         }
       }
-      Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"_inputList: {_inputList.Count}", "Electric");
-      Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"_outputList: {_outputList.Count}", "Electric");
-      Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"_thrustersList: {_thrustersList.Count}", "Electric");
     }
 
     private void HandleBlock(MyCubeBlock block)
     {
       if (block is IMyBatteryBlock)
       {
-        _inputList.Add(block);
-      }
-      else if (block is MyGyro)
-      {
-        // TODO: fix gyro
         _inputList.Add(block);
       }
       else
@@ -118,6 +126,15 @@ namespace Lima2
       if (source != null && source.ResourceTypes.IndexOf(_elec) != -1)
       {
         _outputList.Add(block);
+      }
+    }
+
+    private void OnConnectGrid(MyCubeGrid grid, GridLinkTypeEnum linkType)
+    {
+      if (linkType == GridLinkTypeEnum.Electrical)
+      {
+        Dispose();
+        HandleGrid(_lcdBlock.CubeGrid);
       }
     }
 
