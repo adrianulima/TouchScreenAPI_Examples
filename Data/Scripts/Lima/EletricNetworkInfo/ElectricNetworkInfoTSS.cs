@@ -32,6 +32,14 @@ namespace Lima2
       _surface = surface;
       _terminalBlock = (IMyTerminalBlock)block;
 
+      // Default Blue
+      // surface.ScriptBackgroundColor = new Color(0, 88, 155);
+      // Surface.ScriptForegroundColor = new Color(179, 237, 255);
+
+      // Beige
+      // surface.ScriptBackgroundColor = new Color(140, 120, 95);
+      // Surface.ScriptForegroundColor = new Color(230, 220, 210);
+
       surface.ScriptBackgroundColor = Color.Black;
       Surface.ScriptForegroundColor = Color.RoyalBlue;
     }

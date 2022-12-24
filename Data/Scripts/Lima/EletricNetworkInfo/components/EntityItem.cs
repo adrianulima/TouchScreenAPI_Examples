@@ -17,14 +17,21 @@ namespace Lima2
     private FancyLabel _countLabel;
     private FancyProgressBar _progressBar;
 
-    private readonly Color _mainColor;
-
-    public EntityItem(string title, Color mainColor) : base(ViewDirection.Column, new Color(mainColor * 0.3f, 1))
+    public EntityItem(string title) : base(ViewDirection.Column)
     {
       Title = title;
-      _mainColor = mainColor;
       SetStyles();
       CreateElements();
+
+      RegisterUpdate(Update);
+    }
+
+    private void Update()
+    {
+      SetBgColor(GetApp().GetTheme().GetColorMainDarker(40));
+
+      _titleLabel.SetTextColor(GetApp().GetTheme().GetColorMain());
+      _countLabel.SetTextColor(GetApp().GetTheme().GetColorMain());
     }
 
     private void SetStyles()
@@ -57,14 +64,11 @@ namespace Lima2
       _titleLabel.SetText(Title);
       _countLabel.SetText(Count.ToString());
 
-      _titleLabel.SetTextColor(_mainColor);
-      _countLabel.SetTextColor(_mainColor);
-
       var sv = ElectricNetworkInfoApp.PowerFormat(Value);
 
       _progressBar.SetLabel(sv);
-      _progressBar.SetValue(Value);
       _progressBar.SetMaxValue(MaxValue);
+      _progressBar.SetValue(Value);
     }
   }
 }

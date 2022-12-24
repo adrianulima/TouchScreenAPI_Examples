@@ -53,7 +53,7 @@ namespace Lima2
 
       // Chart Panel
       Charts = new ChartView();
-      Charts.SetChartColors(GetTheme().GetColorMainDarker(20), GetTheme().GetColorMain());
+      Charts.SetChartColors(GetTheme().GetColorMainDarker(30), GetTheme().GetColorMain());
       batteryAndChartPanel.AddChild(Charts);
 
       // Battery Storage bar
@@ -66,21 +66,23 @@ namespace Lima2
       entitiesPanel.SetGap(4);
       AddChild(entitiesPanel);
 
-      var color = GetTheme().GetColorMain();
+      var bgColor = GetTheme().GetColorMainDarker(10);
 
       ConsumptionList = new EntityListView("Input", 3);
-      ConsumptionList.SetScrollViewBgColor(new Color(color * 0.05f, 1));
+      ConsumptionList.SetScrollViewBgColor(bgColor);
       ConsumptionList.SetScale(new Vector2(3, 1));
       entitiesPanel.AddChild(ConsumptionList);
 
       ProductionList = new EntityListView("Output", 1);
-      ProductionList.SetScrollViewBgColor(new Color(color * 0.05f, 1));
+      ProductionList.SetScrollViewBgColor(bgColor);
       ProductionList.SetScale(new Vector2(1, 1));
       entitiesPanel.AddChild(ProductionList);
     }
 
     public void Update()
     {
+      Charts.SetChartColors(GetTheme().GetColorMainDarker(20), GetTheme().GetColorMain());
+
       ConsumptionStatus.Value = _electricMan.Consumption;
       ConsumptionStatus.MaxValue = _electricMan.MaxConsumption;
       ProductionStatus.Value = _electricMan.Production;
@@ -90,6 +92,11 @@ namespace Lima2
       BatteryStorageView.Value = _electricMan.BatteryCharge;
       BatteryStorageView.MaxValue = _electricMan.BatteryMaxCharge;
 
+      var inputRatio = _electricMan.BatteryInput / _electricMan.BatteryMaxInput;
+      BatteryStorageView.InputRatio = float.IsNaN(inputRatio) ? 0f : inputRatio;
+      var outputRatio = _electricMan.BatteryOutput / _electricMan.BatteryMaxOutput;
+      BatteryStorageView.OutputRatio = float.IsNaN(outputRatio) ? 0f : outputRatio;
+
       ConsumptionStatus.UpdateValues();
       ProductionStatus.UpdateValues();
       BatteryOutputStatus.UpdateValues();
@@ -97,43 +104,39 @@ namespace Lima2
 
       Charts.UpdateValues(_electricMan.Consumption, _electricMan.MaxConsumption, _electricMan.Production, _electricMan.MaxProduction);
 
-      var color = GetTheme().GetColorMain();
+      var bgColor = GetTheme().GetColorMainDarker(10);
 
-      ProductionList.SetScrollViewBgColor(new Color(color * 0.05f, 1));
+      ProductionList.SetScrollViewBgColor(bgColor);
       ProductionList.RemoveAllChildren();
 
       var productionList = _electricMan.ProductionBlocks.ToList();
       productionList.Sort((pair1, pair2) => pair2.Value.Y.CompareTo(pair1.Value.Y));
       foreach (var item in productionList)
       {
-        var entity = new EntityItem(item.Key, color);
+        var entity = new EntityItem(item.Key);
         entity.Count = (int)item.Value.X;
         entity.Value = item.Value.Y;
         entity.MaxValue = _electricMan.Production + _electricMan.BatteryOutput;
         entity.UpdateValues();
-        entity.SetBgColor(new Color(color * 0.3f, 1));
         ProductionList.AddItem(entity);
       }
       ProductionList.FillLastView();
 
-      ConsumptionList.SetScrollViewBgColor(new Color(color * 0.05f, 1));
+      ConsumptionList.SetScrollViewBgColor(bgColor);
       ConsumptionList.RemoveAllChildren();
 
       var consumptionList = _electricMan.ConsumptionBlocks.ToList();
       consumptionList.Sort((pair1, pair2) => pair2.Value.Y.CompareTo(pair1.Value.Y));
       foreach (var item in consumptionList)
       {
-        var entity = new EntityItem(item.Key, color);
+        var entity = new EntityItem(item.Key);
         entity.Count = (int)item.Value.X;
         entity.Value = item.Value.Y;
         entity.MaxValue = _electricMan.Consumption;
         entity.UpdateValues();
-        entity.SetBgColor(new Color(color * 0.3f, 1));
         ConsumptionList.AddItem(entity);
       }
       ConsumptionList.FillLastView();
-
-      Charts.SetChartColors(GetTheme().GetColorMainDarker(20), GetTheme().GetColorMain());
     }
 
     public void Dispose()

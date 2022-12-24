@@ -6,13 +6,17 @@ namespace Lima2
 {
   public class Icon : FancyEmptyElement
   {
-    private string _image;
-    private Vector2 _size;
+    public string SpriteImage;
+    public Vector2 SpriteSize;
+    public float SpriteRotation;
+    public Color? SpriteColor;
 
-    public Icon(string image, Vector2 size) : base()
+    public Icon(string image, Vector2 size, float rotation = 0, Color? color = null) : base()
     {
-      _image = image;
-      _size = size;
+      SpriteImage = image;
+      SpriteSize = size;
+      SpriteRotation = rotation;
+      SpriteColor = color;
 
       SetPixels(size);
       SetScale(Vector2.Zero);
@@ -25,10 +29,10 @@ namespace Lima2
       var imageSprite = new MySprite()
       {
         Type = SpriteType.TEXTURE,
-        Data = _image,
-        RotationOrScale = 0,
-        Color = GetApp().GetTheme().GetColorWhite(),
-        Size = _size * GetApp().GetTheme().GetScale(),
+        Data = SpriteImage,
+        RotationOrScale = SpriteRotation,
+        Color = SpriteColor ?? GetApp().GetTheme().GetColorWhite(),
+        Size = SpriteSize * GetApp().GetTheme().GetScale(),
         Position = GetPosition()
       };
 

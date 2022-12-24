@@ -33,13 +33,14 @@ namespace Lima2
 
     public float Production { get; private set; }
     public float MaxProduction { get; private set; }
+    public float BatteryInput { get; private set; }
+    public float BatteryMaxInput { get; private set; }
     public float BatteryOutput { get; private set; }
     public float BatteryMaxOutput { get; private set; }
 
     public float BatteryCharge { get; private set; }
     public float BatteryMaxCharge { get; private set; }
-    public int BatteryCount { get; private set; }
-    public int IsBatteryCharging { get; private set; }
+    public MyResourceStateEnum EnergyState { get; private set; }
 
     private readonly List<IMyCubeGrid> _grids = new List<IMyCubeGrid>();
 
@@ -166,6 +167,16 @@ namespace Lima2
         dict.Add(block.DefinitionDisplayNameText, new Vector2(1, power));
     }
 
+    private void UpdateDistributiorStatus()
+    {
+      // MyResourceDistributorComponent distributor = _lcdBlock.CubeGrid.ResourceDistributor as MyResourceDistributorComponent;
+
+      // var grid = _lcdBlock.CubeGrid as MyCubeGrid;
+      // float hoursLeft = distributor.RemainingFuelTimeByType(MyResourceDistributorComponent.ElectricityId, grid: grid);
+      // MyResourceStateEnum state = distributor.ResourceStateByType(MyResourceDistributorComponent.ElectricityId, grid: grid);
+      // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{hoursLeft} {state}", "Electric");
+    }
+
     public bool Update()
     {
       if (!_init) return false;
@@ -174,10 +185,14 @@ namespace Lima2
       if (_tick % (TicksPerSecond * 1) != 0)// 1 seconds
         return false;
 
+      UpdateDistributiorStatus();
+
       MaxConsumption = 0;
       Consumption = 0;
       Production = 0;
       MaxProduction = 0;
+      BatteryInput = 0;
+      BatteryMaxInput = 0;
       BatteryOutput = 0;
       BatteryMaxOutput = 0;
       BatteryCharge = 0;
@@ -207,7 +222,6 @@ namespace Lima2
           IMyBatteryBlock battery = block as IMyBatteryBlock;
           if (battery != null)
           {
-            // TotalStoring += battery.CurrentInput - battery.CurrentOutput;
             BatteryCharge += battery.CurrentStoredPower;
             BatteryMaxCharge += battery.MaxStoredPower;
 
@@ -215,6 +229,9 @@ namespace Lima2
               MaxConsumption += sink.MaxRequiredInputByType(_elec);
             else
               MaxConsumption += cons;
+
+            BatteryInput = cons;
+            BatteryMaxInput = sink.MaxRequiredInputByType(_elec);
           }
           else
           {
