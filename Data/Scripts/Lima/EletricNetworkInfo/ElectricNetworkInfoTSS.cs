@@ -77,7 +77,8 @@ namespace Lima2
         if (!_init && ticks++ < (6 * 2)) // 2 secs
           return;
 
-        Init();
+        if (!_init)
+          Init();
 
         if (_app == null)
           return;

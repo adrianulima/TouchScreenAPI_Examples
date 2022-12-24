@@ -14,16 +14,19 @@ namespace Lima2
     private List<FancyView> _views = new List<FancyView>();
 
     public string Title;
-    public Color ScrollViewBgColor;
     private int _cols;
 
-    public EntityListView(string title, Color mainColor, int cols = 2) : base(FancyView.ViewDirection.Column)
+    public EntityListView(string title, int cols = 2) : base(FancyView.ViewDirection.Column)
     {
       Title = title;
       _cols = cols;
-      ScrollViewBgColor = mainColor;
 
       CreateElements();
+    }
+
+    public void SetScrollViewBgColor(Color color)
+    {
+      _scrollView.SetBgColor(color);
     }
 
     private void CreateElements()
@@ -32,7 +35,7 @@ namespace Lima2
       titleLabel.SetAlignment(TextAlignment.CENTER);
       AddChild(titleLabel);
 
-      _scrollView = new FancyScrollView(FancyView.ViewDirection.Column, new Color(ScrollViewBgColor * 0.05f, 1));
+      _scrollView = new FancyScrollView(FancyView.ViewDirection.Column);
       _scrollView.SetPadding(new Vector4(2, 2, 2, 0));
       _scrollView.SetGap(2);
       AddChild(_scrollView);

@@ -33,6 +33,8 @@ namespace Lima2
 
     public float Production { get; private set; }
     public float MaxProduction { get; private set; }
+    public float BatteryOutput { get; private set; }
+    public float BatteryMaxOutput { get; private set; }
 
     public float BatteryCharge { get; private set; }
     public float BatteryMaxCharge { get; private set; }
@@ -152,13 +154,15 @@ namespace Lima2
       if (!_init) return false;
 
       _tick++;
-      if (_tick % (TicksPerSecond * 5) != 0)// 5 seconds
+      if (_tick % (TicksPerSecond * 1) != 0)// 1 seconds
         return false;
 
       MaxConsumption = 0;
       Consumption = 0;
       Production = 0;
       MaxProduction = 0;
+      BatteryOutput = 0;
+      BatteryMaxOutput = 0;
       BatteryCharge = 0;
       BatteryMaxCharge = 0;
 
@@ -218,9 +222,16 @@ namespace Lima2
         if (source != null)
         {
           var prod = source.CurrentOutputByType(_elec);
-          Production += prod;
-          MaxProduction += source.MaxOutputByType(_elec);
-
+          if (block is IMyBatteryBlock)
+          {
+            BatteryOutput += prod;
+            BatteryMaxOutput += source.MaxOutputByType(_elec);
+          }
+          else
+          {
+            Production += prod;
+            MaxProduction += source.MaxOutputByType(_elec);
+          }
           UpdatePowerDict(ProductionBlocks, block, prod);
         }
       }

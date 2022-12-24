@@ -20,18 +20,12 @@ namespace Lima2
       Value = value;
       MaxValue = maxValue;
 
-      SetStyles();
       CreateElements();
-    }
-
-    private void SetStyles()
-    {
-      SetGap(4);
     }
 
     private void CreateElements()
     {
-      _titleLabel = new FancyLabel(Title, 0.4f, TextAlignment.LEFT);
+      _titleLabel = new FancyLabel(Title, 0.4f, TextAlignment.CENTER);
       AddChild(_titleLabel);
 
       _progressBar = new FancyProgressBar(0, MaxValue, false);
@@ -47,7 +41,7 @@ namespace Lima2
 
       _progressBar.SetLabel($"{sv} / {smv}");
       _progressBar.SetValue(Value);
-      _progressBar.SetRange(new Vector2(0, MaxValue));
+      _progressBar.SetMaxValue(MaxValue);
     }
   }
 }

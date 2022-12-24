@@ -64,7 +64,7 @@ namespace Lima2
 
       _progressBar.SetLabel(sv);
       _progressBar.SetValue(Value);
-      _progressBar.SetRange(new Vector2(0, MaxValue));
+      _progressBar.SetMaxValue(MaxValue);
     }
   }
 }

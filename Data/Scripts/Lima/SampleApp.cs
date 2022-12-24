@@ -57,7 +57,8 @@ namespace Lima2
       var labelProgressBar = new FancyLabel("Progress Bar");
       labelProgressBar.SetAlignment(VRage.Game.GUI.TextPanel.TextAlignment.LEFT);
       labelProgressBar.SetMargin(Vector4.UnitY * 8);
-      var progressBar = new FancyProgressBar(-100, 100);
+      var progressBar = new FancyProgressBar(0, 100);
+      progressBar.SetValue(50);
       progressBar.SetLabel("50%");
       progressBar.SetLabelAlignment(VRage.Game.GUI.TextPanel.TextAlignment.RIGHT);
 
