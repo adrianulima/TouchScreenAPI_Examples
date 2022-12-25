@@ -26,7 +26,7 @@ namespace Lima2
     private MyDefinitionId _elec = MyResourceDistributorComponent.ElectricityId;
 
     public const int TicksPerSecond = (int)((MyEngineConstants.UPDATE_STEPS_PER_MINUTE / 60) / 10);
-    private int _tick = 0;
+    private int _tick = TicksPerSecond - 1;
 
     public float Consumption { get; private set; }
     public float MaxConsumption { get; private set; }
@@ -41,6 +41,7 @@ namespace Lima2
     public float BatteryCharge { get; private set; }
     public float BatteryMaxCharge { get; private set; }
     public MyResourceStateEnum EnergyState { get; private set; }
+    public float BatteryHoursLeft { get; private set; }
 
     private readonly List<IMyCubeGrid> _grids = new List<IMyCubeGrid>();
 
@@ -169,12 +170,10 @@ namespace Lima2
 
     private void UpdateDistributiorStatus()
     {
-      // MyResourceDistributorComponent distributor = _lcdBlock.CubeGrid.ResourceDistributor as MyResourceDistributorComponent;
-
-      // var grid = _lcdBlock.CubeGrid as MyCubeGrid;
-      // float hoursLeft = distributor.RemainingFuelTimeByType(MyResourceDistributorComponent.ElectricityId, grid: grid);
-      // MyResourceStateEnum state = distributor.ResourceStateByType(MyResourceDistributorComponent.ElectricityId, grid: grid);
-      // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{hoursLeft} {state}", "Electric");
+      MyResourceDistributorComponent distributor = _lcdBlock.CubeGrid.ResourceDistributor as MyResourceDistributorComponent;
+      var grid = _lcdBlock.CubeGrid as MyCubeGrid;
+      BatteryHoursLeft = distributor.RemainingFuelTimeByType(MyResourceDistributorComponent.ElectricityId, grid: grid);
+      EnergyState = distributor.ResourceStateByType(MyResourceDistributorComponent.ElectricityId, grid: grid);
     }
 
     public bool Update()

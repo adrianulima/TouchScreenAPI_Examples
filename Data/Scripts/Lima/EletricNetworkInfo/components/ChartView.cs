@@ -167,8 +167,8 @@ namespace Lima2
       _legends[3].SetMargin(Vector4.UnitY * 2);
       _legendsView.AddChild(_legends[3]);
 
-      var checkboxLabel = new FancyLabel("Battery ", 0.4f, TextAlignment.RIGHT);
-      checkboxLabel.SetMargin(Vector4.UnitY * 2);
+      var checkboxLabel = new FancyLabel("Battery", 0.4f, TextAlignment.RIGHT);
+      checkboxLabel.SetMargin(new Vector4(0, 2, 4, 0));
       checkboxLabel.SetScale(new Vector2(0.5f, 0));
       _legendsView.AddChild(checkboxLabel);
       var checkbox = new FancyCheckbox((bool v) =>

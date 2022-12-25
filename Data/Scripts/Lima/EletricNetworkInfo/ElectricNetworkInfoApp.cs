@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using VRageMath;
 using Lima.API;
 using System.Linq;
+using VRage;
+using VRage.Utils;
+using System.Text;
 
 namespace Lima2
 {
@@ -40,11 +43,11 @@ namespace Lima2
       barsPanel.SetGap(4);
       windowBarsAndChard.AddChild(barsPanel);
 
-      ConsumptionStatus = new StatusView("Consumption");
+      ConsumptionStatus = new StatusView("CONSUMPTION");
       barsPanel.AddChild(ConsumptionStatus);
-      ProductionStatus = new StatusView("Production");
+      ProductionStatus = new StatusView("PRODUCTION");
       barsPanel.AddChild(ProductionStatus);
-      BatteryOutputStatus = new StatusView("Battery Output");
+      BatteryOutputStatus = new StatusView("BATTERY OUTPUT");
       barsPanel.AddChild(BatteryOutputStatus);
 
       var batteryAndChartPanel = new FancyView(FancyView.ViewDirection.Row);
@@ -68,12 +71,12 @@ namespace Lima2
 
       var bgColor = GetTheme().GetColorMainDarker(10);
 
-      ConsumptionList = new EntityListView("Input", 3);
+      ConsumptionList = new EntityListView("INPUT", 3);
       ConsumptionList.SetScrollViewBgColor(bgColor);
       ConsumptionList.SetScale(new Vector2(3, 1));
       entitiesPanel.AddChild(ConsumptionList);
 
-      ProductionList = new EntityListView("Output", 1);
+      ProductionList = new EntityListView("OUTPUT", 1);
       ProductionList.SetScrollViewBgColor(bgColor);
       ProductionList.SetScale(new Vector2(1, 1));
       entitiesPanel.AddChild(ProductionList);
@@ -89,6 +92,8 @@ namespace Lima2
       BatteryOutputStatus.MaxValue = _electricMan.BatteryMaxOutput;
       BatteryStorageView.Value = _electricMan.BatteryCharge;
       BatteryStorageView.MaxValue = _electricMan.BatteryMaxCharge;
+      BatteryStorageView.HoursLeft = _electricMan.BatteryHoursLeft;
+      BatteryStorageView.UpdateOverloadStyle(_electricMan.EnergyState == MyResourceStateEnum.OverloadBlackout);
 
       var inputRatio = _electricMan.BatteryInput / _electricMan.BatteryMaxInput;
       BatteryStorageView.InputRatio = float.IsNaN(inputRatio) ? 0f : inputRatio;
@@ -169,9 +174,15 @@ namespace Lima2
       return $"{(MW * 1000000f).ToString(decimals)} W";
     }
 
-    public static string PowerStorageFormat(float MWh)
+    private readonly static StringBuilder _str = new StringBuilder();
+    public static string HoursFormat(float hours, string decimals = "0.##")
     {
-      return $"{MWh} h";
+      if (hours > 24 * 365)
+        return "1 year";
+
+      _str.Clear();
+      MyValueFormatter.AppendTimeInBestUnit(hours * 3600f, _str);
+      return _str.ToString();
     }
   }
 }
