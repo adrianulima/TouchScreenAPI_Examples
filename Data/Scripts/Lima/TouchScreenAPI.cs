@@ -164,6 +164,8 @@ namespace Lima.API
       AssignMethod(delegates, "FancyApp_GetViewport", ref FancyApp_GetViewport);
       AssignMethod(delegates, "FancyApp_GetCursor", ref FancyApp_GetCursor);
       AssignMethod(delegates, "FancyApp_GetTheme", ref FancyApp_GetTheme);
+      AssignMethod(delegates, "FancyApp_GetDefaultBg", ref FancyApp_GetDefaultBg);
+      AssignMethod(delegates, "FancyApp_SetDefaultBg", ref FancyApp_SetDefaultBg);
       AssignMethod(delegates, "FancyApp_InitApp", ref FancyApp_InitApp);
       AssignMethod(delegates, "FancyButtonBase_GetHandler", ref FancyButtonBase_GetHandler);
       AssignMethod(delegates, "FancyButton_New", ref FancyButton_New);
@@ -172,6 +174,10 @@ namespace Lima.API
       AssignMethod(delegates, "FancyButton_SetOnChange", ref FancyButton_SetOnChange);
       AssignMethod(delegates, "FancyButton_GetAlignment", ref FancyButton_GetAlignment);
       AssignMethod(delegates, "FancyButton_SetAlignment", ref FancyButton_SetAlignment);
+      AssignMethod(delegates, "FancyCheckbox_New", ref FancyCheckbox_New);
+      AssignMethod(delegates, "FancyCheckbox_GetValue", ref FancyCheckbox_GetValue);
+      AssignMethod(delegates, "FancyCheckbox_SetValue", ref FancyCheckbox_SetValue);
+      AssignMethod(delegates, "FancyCheckbox_SetOnChange", ref FancyCheckbox_SetOnChange);
       AssignMethod(delegates, "FancyLabel_New", ref FancyLabel_New);
       AssignMethod(delegates, "FancyLabel_GetText", ref FancyLabel_GetText);
       AssignMethod(delegates, "FancyLabel_SetText", ref FancyLabel_SetText);
@@ -350,6 +356,8 @@ namespace Lima.API
     public Func<object, RectangleF> FancyApp_GetViewport;
     public Func<object, object> FancyApp_GetCursor;
     public Func<object, object> FancyApp_GetTheme;
+    public Func<object, bool> FancyApp_GetDefaultBg;
+    public Action<object, bool> FancyApp_SetDefaultBg;
     public Action<object, MyCubeBlock, Sandbox.ModAPI.Ingame.IMyTextSurface> FancyApp_InitApp;
 
     public Func<object, object> FancyButtonBase_GetHandler;
@@ -360,6 +368,11 @@ namespace Lima.API
     public Action<object, Action> FancyButton_SetOnChange;
     public Func<object, TextAlignment> FancyButton_GetAlignment;
     public Action<object, TextAlignment> FancyButton_SetAlignment;
+
+    public Func<Action<bool>, bool, object> FancyCheckbox_New;
+    public Func<object, bool> FancyCheckbox_GetValue;
+    public Action<object, bool> FancyCheckbox_SetValue;
+    public Action<object, Action<bool>> FancyCheckbox_SetOnChange;
 
     public Func<string, float, TextAlignment, object> FancyLabel_New;
     public Func<object, string> FancyLabel_GetText;
@@ -579,6 +592,8 @@ namespace Lima.API
     public RectangleF GetViewport() => Api.FancyApp_GetViewport.Invoke(internalObj);
     public FancyCursor GetCursor() { if (Cursor == null) Cursor = new FancyCursor(Api.FancyApp_GetCursor.Invoke(internalObj)); return Cursor; }
     public FancyTheme GetTheme() { if (Theme == null) Theme = new FancyTheme(Api.FancyApp_GetTheme.Invoke(internalObj)); return Theme; }
+    public bool GetDefaultBg() => Api.FancyApp_GetDefaultBg.Invoke(internalObj);
+    public void SetDefaultBg(bool defaultBg) => Api.FancyApp_SetDefaultBg.Invoke(internalObj, defaultBg);
     public void InitApp(MyCubeBlock block, Sandbox.ModAPI.Ingame.IMyTextSurface surface) => Api.FancyApp_InitApp.Invoke(internalObj, block, surface);
   }
   public abstract class FancyButtonBase : FancyElementBase
@@ -596,6 +611,14 @@ namespace Lima.API
     public void SetOnChange(Action onChange) => Api.FancyButton_SetOnChange.Invoke(internalObj, onChange);
     public TextAlignment GetAlignment() => Api.FancyButton_GetAlignment.Invoke(internalObj);
     public void SetAlignment(TextAlignment alignment) => Api.FancyButton_SetAlignment.Invoke(internalObj, alignment);
+  }
+  public class FancyCheckbox : FancyButtonBase
+  {
+    public FancyCheckbox(Action<bool> onChange, bool value = false) : base(Api.FancyCheckbox_New(onChange, value)) { }
+    public FancyCheckbox(object internalObject) : base(internalObject) { }
+    public bool GetValue() => Api.FancyCheckbox_GetValue.Invoke(internalObj);
+    public void SetValue(bool value) => Api.FancyCheckbox_SetValue.Invoke(internalObj, value);
+    public void SetOnChange(Action<bool> onChange) => Api.FancyCheckbox_SetOnChange.Invoke(internalObj, onChange);
   }
   public class FancyLabel : FancyElementBase
   {

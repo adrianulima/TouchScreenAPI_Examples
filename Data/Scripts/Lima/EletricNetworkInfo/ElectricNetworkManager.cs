@@ -245,7 +245,6 @@ namespace Lima2
               MaxConsumption += Math.Max(cons, sink.MaxRequiredInputByType(_elec));
           }
 
-
           UpdatePowerDict(ConsumptionBlocks, block, cons);
         }
       }

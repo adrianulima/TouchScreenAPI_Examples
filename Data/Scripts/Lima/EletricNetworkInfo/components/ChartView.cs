@@ -3,6 +3,7 @@ using Lima.API;
 using System.Collections.Generic;
 using System;
 using VRage.Game.GUI.TextPanel;
+using System.Linq;
 
 namespace Lima2
 {
@@ -12,8 +13,11 @@ namespace Lima2
     private List<float> _maxConsumptionHistory = new List<float>();
     private List<float> _productionHistory = new List<float>();
     private List<float> _maxProductionHistory = new List<float>();
+    private List<float> _batteryOutputHistory = new List<float>();
+    private List<float> _batteryMaxOutputHistory = new List<float>();
 
-    public int maxSamples = 1000;
+    public int maxSamples = 1800; // 30 min
+    private int _skip = 1;
 
     private FancyChart _chart;
     private FancyView _chartView;
@@ -22,6 +26,8 @@ namespace Lima2
     private List<float[]> _dataSets;
     private LegendItem[] _legends;
     private FancyLabel[] _labels;
+
+    public bool BatteryOutputAsProduction = false;
 
     public ChartView() : base(ViewDirection.Column)
     {
@@ -59,9 +65,30 @@ namespace Lima2
 
     private void CreateElements()
     {
-      var intervalSwitcher = new FancySwitch(new string[] { "30s", "1m", "10m", "30m", "1h" }, 0, (int v) =>
+      var intervalSwitcher = new FancySwitch(new string[] { "30s", "1m", "5m", "10m", "30m" }, 0, (int v) =>
       {
-
+        switch (v)
+        {
+          case 0:
+            _skip = 1;
+            break;
+          case 1:
+            _skip = 2; // 60 / 30;
+            break;
+          case 2:
+            _skip = 10; // (5 * 60) / 30;
+            break;
+          case 3:
+            _skip = 20; // (10 * 60) / 30;
+            break;
+          case 4:
+            _skip = 60; // (30 * 60) / 30;
+            break;
+          default:
+            _skip = 1;
+            break;
+        }
+        UpdateChartDataSets();
       });
       AddChild(intervalSwitcher);
 
@@ -121,47 +148,92 @@ namespace Lima2
       chartWrapper.AddChild(_chart);
 
       _legendsView = new FancyView(ViewDirection.Row);
-      _legendsView.SetPadding(new Vector4(8, 4, 8, 4));
+      _legendsView.SetPadding(new Vector4(8, 2, 4, 2));
       _legendsView.SetScale(new Vector2(1, 0));
       _legendsView.SetPixels(new Vector2(0, 20));
       AddChild(_legendsView);
 
       _legends = new LegendItem[4];
       _legends[0] = new LegendItem("Consumption", Color.OrangeRed);
+      _legends[0].SetMargin(Vector4.UnitY * 2);
       _legendsView.AddChild(_legends[0]);
       _legends[1] = new LegendItem("Max Consum.", Color.SlateGray);
+      _legends[1].SetMargin(Vector4.UnitY * 2);
       _legendsView.AddChild(_legends[1]);
       _legends[2] = new LegendItem("Production", Color.DarkGreen);
+      _legends[2].SetMargin(Vector4.UnitY * 2);
       _legendsView.AddChild(_legends[2]);
       _legends[3] = new LegendItem("Max Prod.", Color.DarkSlateGray);
+      _legends[3].SetMargin(Vector4.UnitY * 2);
       _legendsView.AddChild(_legends[3]);
+
+      var checkboxLabel = new FancyLabel("Battery ", 0.4f, TextAlignment.RIGHT);
+      checkboxLabel.SetMargin(Vector4.UnitY * 2);
+      checkboxLabel.SetScale(new Vector2(0.5f, 0));
+      _legendsView.AddChild(checkboxLabel);
+      var checkbox = new FancyCheckbox((bool v) =>
+      {
+        BatteryOutputAsProduction = v;
+        UpdateChartDataSets();
+      }, BatteryOutputAsProduction);
+      checkbox.SetPixels(new Vector2(16));
+      _legendsView.AddChild(checkbox);
     }
 
-    public void UpdateValues(float consumption, float maxConsumption, float production, float maxProduction)
+    public void UpdateValues(float consumption, float maxConsumption, float production, float maxProduction, float batteryOutput, float batteryMaxOutput)
     {
       _consumptionHistory.Add(consumption);
       _maxConsumptionHistory.Add(maxConsumption);
       _productionHistory.Add(production);
       _maxProductionHistory.Add(maxProduction);
+      _batteryOutputHistory.Add(batteryOutput);
+      _batteryMaxOutputHistory.Add(batteryMaxOutput);
 
       TrimHistoryLimit();
 
-      UpdateChartDataSets();
+      // Prevent calling these methods every second if they won't give different results
+      if (_skip == 1 || _maxProductionHistory.Count % _skip == 0)
+        UpdateChartDataSets();
     }
 
     private void UpdateChartDataSets()
     {
-      var source = _consumptionHistory.ToArray();
-      _dataSets[3] = source;
+      var count = 30;
+      if (BatteryOutputAsProduction)
+      {
+        _dataSets[0] = SumLists(
+          TakeOneEvery(TakeLast(_maxProductionHistory, count * _skip), _skip),
+          TakeOneEvery(TakeLast(_batteryMaxOutputHistory, count * _skip), _skip)
+        ).ToArray();
+        _dataSets[1] = SumLists(
+          TakeOneEvery(TakeLast(_productionHistory, count * _skip), _skip),
+          TakeOneEvery(TakeLast(_batteryOutputHistory, count * _skip), _skip)
+        ).ToArray();
+      }
+      else
+      {
+        _dataSets[0] = TakeOneEvery(TakeLast(_maxProductionHistory, count * _skip), _skip).ToArray();
+        _dataSets[1] = TakeOneEvery(TakeLast(_productionHistory, count * _skip), _skip).ToArray();
+      }
+      _dataSets[3] = TakeOneEvery(TakeLast(_consumptionHistory, count * _skip), _skip).ToArray();
+      _dataSets[2] = TakeOneEvery(TakeLast(_maxConsumptionHistory, count * _skip), _skip).ToArray();
+    }
 
-      source = _maxConsumptionHistory.ToArray();
-      _dataSets[2] = source;
+    private IEnumerable<float> TakeLast(IEnumerable<float> list, int n)
+    {
+      return list.Skip(Math.Max(0, list.Count() - n));
+    }
 
-      source = _productionHistory.ToArray();
-      _dataSets[1] = source;
+    private IEnumerable<float> TakeOneEvery(IEnumerable<float> list, int n)
+    {
+      if (n <= 1)
+        return list;
+      return list.Where((val, i) => i % n == 0);
+    }
 
-      source = _maxProductionHistory.ToArray();
-      _dataSets[0] = source;
+    private IEnumerable<float> SumLists(IEnumerable<float> listA, IEnumerable<float> listB)
+    {
+      return listA.Zip(listB, (x, y) => x + y);
     }
 
     private void TrimHistoryLimit()
@@ -174,6 +246,10 @@ namespace Lima2
         _productionHistory.RemoveAt(0);
       while (_maxProductionHistory.Count > maxSamples)
         _maxProductionHistory.RemoveAt(0);
+      while (_batteryOutputHistory.Count > maxSamples)
+        _batteryOutputHistory.RemoveAt(0);
+      while (_batteryMaxOutputHistory.Count > maxSamples)
+        _batteryMaxOutputHistory.RemoveAt(0);
     }
   }
 }

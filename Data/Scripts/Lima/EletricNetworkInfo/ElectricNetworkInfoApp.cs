@@ -81,8 +81,6 @@ namespace Lima2
 
     public void Update()
     {
-      Charts.SetChartColors(GetTheme().GetColorMainDarker(20), GetTheme().GetColorMain());
-
       ConsumptionStatus.Value = _electricMan.Consumption;
       ConsumptionStatus.MaxValue = _electricMan.MaxConsumption;
       ProductionStatus.Value = _electricMan.Production;
@@ -102,7 +100,15 @@ namespace Lima2
       BatteryOutputStatus.UpdateValues();
       BatteryStorageView.UpdateValues();
 
-      Charts.UpdateValues(_electricMan.Consumption, _electricMan.MaxConsumption, _electricMan.Production, _electricMan.MaxProduction);
+      Charts.SetChartColors(GetTheme().GetColorMainDarker(20), GetTheme().GetColorMain());
+      Charts.UpdateValues(
+        _electricMan.Consumption,
+        _electricMan.MaxConsumption,
+        _electricMan.Production,
+        _electricMan.MaxProduction,
+        _electricMan.BatteryOutput,
+        _electricMan.BatteryMaxOutput
+      );
 
       var bgColor = GetTheme().GetColorMainDarker(10);
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using VRageMath;
 using Lima.API;
+using VRage.Game.GUI.TextPanel;
 
 namespace Lima2
 {
@@ -9,6 +10,7 @@ namespace Lima2
   {
     public SampleApp()
     {
+      SetDefaultBg(true);
     }
 
     public void CreateElements()
@@ -103,6 +105,18 @@ namespace Lima2
         Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage(text, "SampleApp");
       });
 
+      var checkboxView = new FancyView(ViewDirection.Row);
+      checkboxView.SetPadding(new Vector4(4));
+      var checkboxLabel = new FancyLabel("Checkbox", 0.5f, TextAlignment.RIGHT);
+      checkboxLabel.SetMargin(new Vector4(4));
+      var checkbox = new FancyCheckbox((bool v) =>
+      {
+        Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{v}", "SampleApp");
+      });
+      checkboxView.AddChild(checkboxLabel);
+      checkboxView.AddChild(checkbox);
+
+
       col1.AddChild(header1);
       col1.AddChild(separator1);
       col1.AddChild(labelSlider);
@@ -119,6 +133,7 @@ namespace Lima2
       col2.AddChild(button);
       col2.AddChild(labelTextField);
       col2.AddChild(textField);
+      col2.AddChild(checkboxView);
       window.AddChild(col1);
       window.AddChild(col2);
       AddChild(windowBar);
