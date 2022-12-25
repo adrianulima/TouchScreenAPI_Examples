@@ -11,7 +11,8 @@ namespace Lima2
 {
   public class ElectricNetworkInfoApp : FancyApp
   {
-    private ElectricNetworkManager _electricMan = new ElectricNetworkManager();
+    private ElectricNetworkManager _electricMan;
+    private int _lastUpdate = -1;
 
     public ElectricNetworkInfoApp(ElectricNetworkManager electricManager)
     {
@@ -56,7 +57,6 @@ namespace Lima2
 
       // Chart Panel
       Charts = new ChartView();
-      Charts.SetChartColors(Theme.GetMainColorDarker(3), Theme.MainColor);
       batteryAndChartPanel.AddChild(Charts);
 
       // Battery Storage bar
@@ -82,8 +82,12 @@ namespace Lima2
       entitiesPanel.AddChild(ProductionList);
     }
 
-    public void Update()
+    public void UpdateValues()
     {
+      if (_electricMan.Updatecount <= _lastUpdate)
+        return;
+      _lastUpdate = _electricMan.Updatecount;
+
       ConsumptionStatus.Value = _electricMan.Consumption;
       ConsumptionStatus.MaxValue = _electricMan.MaxConsumption;
       ProductionStatus.Value = _electricMan.Production;
@@ -105,7 +109,6 @@ namespace Lima2
       BatteryOutputStatus.UpdateValues();
       BatteryStorageView.UpdateValues();
 
-      Charts.SetChartColors(Theme.GetMainColorDarker(2), Theme.MainColor);
       Charts.UpdateValues(
         _electricMan.Consumption,
         _electricMan.MaxConsumption,

@@ -32,10 +32,15 @@ namespace Lima2
     public ChartView() : base(ViewDirection.Column)
     {
       CreateElements();
+
+      RegisterUpdate(Update);
     }
 
-    public void SetChartColors(Color bgColor, Color color)
+    private void Update()
     {
+      var bgColor = App.Theme.GetMainColorDarker(2);
+      var color = App.Theme.MainColor;
+
       _chartView.BorderColor = bgColor;
       _chartView.Border = new Vector4(1);
       _legendsView.BgColor = bgColor;

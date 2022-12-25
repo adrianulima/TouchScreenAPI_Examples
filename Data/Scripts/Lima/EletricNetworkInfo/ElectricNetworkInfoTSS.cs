@@ -15,8 +15,6 @@ namespace Lima2
   {
     public override ScriptUpdate NeedsUpdate => ScriptUpdate.Update10;
 
-    private ElectricNetworkManager _electricMan = new ElectricNetworkManager();
-
     private IMyCubeBlock _block;
     private IMyTerminalBlock _terminalBlock;
     private IMyTextSurface _surface;
@@ -53,9 +51,9 @@ namespace Lima2
         return;
       _init = true;
 
-      _electricMan.Init(_block);
+      GameSession.Instance.ElectricMan.Init(_block);
 
-      _app = new ElectricNetworkInfoApp(_electricMan);
+      _app = new ElectricNetworkInfoApp(GameSession.Instance.ElectricMan);
       _app.InitApp(this.Block as MyCubeBlock, this.Surface as IMyTextSurface);
       _app.CreateElements();
       _app.InitElements();
@@ -68,7 +66,6 @@ namespace Lima2
     {
       base.Dispose();
 
-      _electricMan.Dispose();
       _app?.Dispose();
       _terminalBlock.OnMarkForClose -= BlockMarkedForClose;
     }
@@ -95,8 +92,7 @@ namespace Lima2
 
         using (var frame = m_surface.DrawFrame())
         {
-          if (_electricMan.Update())
-            _app.Update();
+          _app.UpdateValues();
           frame.AddRange(_app.Sprites);
           frame.Dispose();
         }

@@ -6,11 +6,13 @@ using VRage.Utils;
 
 namespace Lima2
 {
-  [MySessionComponentDescriptor(MyUpdateOrder.NoUpdate)]
+  [MySessionComponentDescriptor(MyUpdateOrder.AfterSimulation)]
   public class GameSession : MySessionComponentBase
   {
     public TouchScreenAPI Api { get; private set; }
     public static GameSession Instance;
+
+    public ElectricNetworkManager ElectricMan;
 
     public override void LoadData()
     {
@@ -19,13 +21,24 @@ namespace Lima2
 
       Instance = this;
       Api = new TouchScreenAPI();
+      ElectricMan = new ElectricNetworkManager();
       Api.Load();
     }
 
     protected override void UnloadData()
     {
+      ElectricMan.Dispose();
+
       Api?.Unload();
       Instance = null;
+    }
+
+    public override void UpdateAfterSimulation()
+    {
+      if (ElectricMan == null)
+        return;
+
+      ElectricMan.Update();
     }
   }
 }

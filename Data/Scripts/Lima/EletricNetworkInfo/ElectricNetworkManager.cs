@@ -25,8 +25,9 @@ namespace Lima2
 
     private MyDefinitionId _elec = MyResourceDistributorComponent.ElectricityId;
 
-    public const int TicksPerSecond = (int)((MyEngineConstants.UPDATE_STEPS_PER_MINUTE / 60) / 10);
+    public const int TicksPerSecond = (int)((MyEngineConstants.UPDATE_STEPS_PER_MINUTE / 60));
     private int _tick = TicksPerSecond - 1;
+    public int Updatecount = 0;
 
     public float Consumption { get; private set; }
     public float MaxConsumption { get; private set; }
@@ -54,10 +55,12 @@ namespace Lima2
 
     public ElectricNetworkManager()
     {
+      Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage("new ElectricNetworkManager", "Electric");
     }
 
     public void Dispose()
     {
+      Updatecount = 0;
       _grids.Clear();
       _inputList.Clear();
       _outputList.Clear();
@@ -176,13 +179,15 @@ namespace Lima2
       EnergyState = distributor.ResourceStateByType(MyResourceDistributorComponent.ElectricityId, grid: grid);
     }
 
-    public bool Update()
+    public void Update()
     {
-      if (!_init) return false;
+      if (!_init) return;
 
       _tick++;
-      if (_tick % (TicksPerSecond * 1) != 0)// 1 seconds
-        return false;
+      if (_tick % (TicksPerSecond * 1) != 0)// 1 second
+        return;
+      _tick = 0;
+      Updatecount++;
 
       UpdateDistributiorStatus();
 
@@ -271,7 +276,6 @@ namespace Lima2
       // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{block.DefinitionDisplayNameText} {Math.Max(cons, sink.MaxRequiredInputByType(_elec))}", "Electric");
       // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{Consumption}/{MaxConsumption}", "Electric");
       // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{Production}/{MaxProduction}", "Electric");
-      return true;
     }
   }
 }
