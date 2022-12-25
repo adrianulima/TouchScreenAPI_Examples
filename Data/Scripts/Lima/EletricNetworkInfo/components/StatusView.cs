@@ -29,8 +29,8 @@ namespace Lima2
       AddChild(_titleLabel);
 
       _progressBar = new FancyProgressBar(0, MaxValue, false);
-      _progressBar.SetLabelScale(0.4f);
-      _progressBar.SetLabelAlignment(TextAlignment.RIGHT);
+      _progressBar.LabelScale = 0.4f;
+      _progressBar.LabelAlignment = TextAlignment.RIGHT;
       AddChild(_progressBar);
     }
 
@@ -39,9 +39,9 @@ namespace Lima2
       var sv = ElectricNetworkInfoApp.PowerFormat(Value);
       var smv = ElectricNetworkInfoApp.PowerFormat(MaxValue);
 
-      _progressBar.SetLabel($"{sv} / {smv}");
-      _progressBar.SetValue(Value);
-      _progressBar.SetMaxValue(MaxValue);
+      _progressBar.Label = $"{sv} / {smv}";
+      _progressBar.Value = Value;
+      _progressBar.MaxValue = MaxValue;
     }
   }
 }

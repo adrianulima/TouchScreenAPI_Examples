@@ -32,15 +32,15 @@ namespace Lima2
       AddChild(windowBar);
 
       var windowBarsAndChard = new FancyView();
-      windowBarsAndChard.SetPadding(new Vector4(4));
-      windowBarsAndChard.SetGap(4);
+      windowBarsAndChard.Padding = new Vector4(4);
+      windowBarsAndChard.Gap = 4;
       AddChild(windowBarsAndChard);
 
       // Bars
       var barsPanel = new FancyView(FancyView.ViewDirection.Row);
-      barsPanel.SetPixels(new Vector2(0, 32 * 0.4f + 24));
-      barsPanel.SetScale(new Vector2(1, 0));
-      barsPanel.SetGap(4);
+      barsPanel.Pixels = new Vector2(0, 32 * 0.4f + 24);
+      barsPanel.Scale = new Vector2(1, 0);
+      barsPanel.Gap = 4;
       windowBarsAndChard.AddChild(barsPanel);
 
       ConsumptionStatus = new StatusView("CONSUMPTION");
@@ -51,12 +51,12 @@ namespace Lima2
       barsPanel.AddChild(BatteryOutputStatus);
 
       var batteryAndChartPanel = new FancyView(FancyView.ViewDirection.Row);
-      batteryAndChartPanel.SetGap(4);
+      batteryAndChartPanel.Gap = 4;
       windowBarsAndChard.AddChild(batteryAndChartPanel);
 
       // Chart Panel
       Charts = new ChartView();
-      Charts.SetChartColors(GetTheme().GetColorMainDarker(30), GetTheme().GetColorMain());
+      Charts.SetChartColors(Theme.GetMainColorDarker(3), Theme.MainColor);
       batteryAndChartPanel.AddChild(Charts);
 
       // Battery Storage bar
@@ -65,20 +65,20 @@ namespace Lima2
 
       // Entities Panel
       var entitiesPanel = new FancyView(FancyView.ViewDirection.Row);
-      entitiesPanel.SetPadding(new Vector4(4));
-      entitiesPanel.SetGap(4);
+      entitiesPanel.Padding = new Vector4(4);
+      entitiesPanel.Gap = 4;
       AddChild(entitiesPanel);
 
-      var bgColor = GetTheme().GetColorMainDarker(10);
+      var bgColor = Theme.GetMainColorDarker(1);
 
       ConsumptionList = new EntityListView("INPUT", 3);
       ConsumptionList.SetScrollViewBgColor(bgColor);
-      ConsumptionList.SetScale(new Vector2(3, 1));
+      ConsumptionList.Scale = new Vector2(3, 1);
       entitiesPanel.AddChild(ConsumptionList);
 
       ProductionList = new EntityListView("OUTPUT", 1);
       ProductionList.SetScrollViewBgColor(bgColor);
-      ProductionList.SetScale(new Vector2(1, 1));
+      ProductionList.Scale = new Vector2(1, 1);
       entitiesPanel.AddChild(ProductionList);
     }
 
@@ -105,7 +105,7 @@ namespace Lima2
       BatteryOutputStatus.UpdateValues();
       BatteryStorageView.UpdateValues();
 
-      Charts.SetChartColors(GetTheme().GetColorMainDarker(20), GetTheme().GetColorMain());
+      Charts.SetChartColors(Theme.GetMainColorDarker(2), Theme.MainColor);
       Charts.UpdateValues(
         _electricMan.Consumption,
         _electricMan.MaxConsumption,
@@ -115,7 +115,7 @@ namespace Lima2
         _electricMan.BatteryMaxOutput
       );
 
-      var bgColor = GetTheme().GetColorMainDarker(10);
+      var bgColor = Theme.GetMainColorDarker(1);
 
       ProductionList.SetScrollViewBgColor(bgColor);
       ProductionList.RemoveAllChildren();

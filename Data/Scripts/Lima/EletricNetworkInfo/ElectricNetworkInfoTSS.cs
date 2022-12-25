@@ -59,7 +59,7 @@ namespace Lima2
       _app.InitApp(this.Block as MyCubeBlock, this.Surface as IMyTextSurface);
       _app.CreateElements();
       _app.InitElements();
-      _app.GetTheme().SetScale(Math.Min(Math.Max(this.Surface.SurfaceSize.Y / 256, 0.4f), 1));
+      _app.Theme.Scale = Math.Min(Math.Max(this.Surface.SurfaceSize.Y / 256, 0.4f), 1);
 
       _terminalBlock.OnMarkForClose += BlockMarkedForClose;
     }
@@ -97,7 +97,7 @@ namespace Lima2
         {
           if (_electricMan.Update())
             _app.Update();
-          frame.AddRange(_app.GetSprites());
+          frame.AddRange(_app.Sprites);
           frame.Dispose();
         }
       }

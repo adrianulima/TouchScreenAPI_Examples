@@ -18,8 +18,8 @@ namespace Lima2
       SpriteRotation = rotation;
       SpriteColor = color;
 
-      SetPixels(size);
-      SetScale(Vector2.Zero);
+      Pixels = size;
+      Scale = Vector2.Zero;
 
       RegisterUpdate(Update);
     }
@@ -31,13 +31,13 @@ namespace Lima2
         Type = SpriteType.TEXTURE,
         Data = SpriteImage,
         RotationOrScale = SpriteRotation,
-        Color = SpriteColor ?? GetApp().GetTheme().GetColorWhite(),
-        Size = SpriteSize * GetApp().GetTheme().GetScale(),
-        Position = GetPosition()
+        Color = SpriteColor ?? App.Theme.WhiteColor,
+        Size = SpriteSize * App.Theme.Scale,
+        Position = Position
       };
 
-      GetSprites().Clear();
-      GetSprites().Add(imageSprite);
+      Sprites.Clear();
+      Sprites.Add(imageSprite);
     }
   }
 }

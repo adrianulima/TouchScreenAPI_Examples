@@ -26,22 +26,22 @@ namespace Lima2
 
     public void UpdateTitleColor(Color color)
     {
-      _titleLabel.SetTextColor(color);
+      _titleLabel.TextColor = color;
     }
 
     private void CreateElements()
     {
-      SetGap(4);
+      Gap = 4;
 
       _square = new FancyView();
-      _square.SetBgColor(_color);
-      _square.SetMargin(Vector4.UnitY * 2);
-      _square.SetPixels(new Vector2(8, 10));
-      _square.SetScale(new Vector2(0, 0));
+      _square.BgColor = _color;
+      _square.Margin = Vector4.UnitY * 2;
+      _square.Pixels = new Vector2(8, 10);
+      _square.Scale = new Vector2(0, 0);
       AddChild(_square);
 
       _titleLabel = new FancyLabel(Title, 0.4f, TextAlignment.CENTER);
-      _titleLabel.SetAlignment(TextAlignment.LEFT);
+      _titleLabel.Alignment = TextAlignment.LEFT;
       AddChild(_titleLabel);
     }
 
@@ -49,7 +49,7 @@ namespace Lima2
     {
       var sv = ElectricNetworkInfoApp.PowerFormat(Value);
 
-      _titleLabel.SetText($"{sv}");
+      _titleLabel.Text = sv;
     }
   }
 }

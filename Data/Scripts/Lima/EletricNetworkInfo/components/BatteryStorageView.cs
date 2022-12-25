@@ -41,7 +41,7 @@ namespace Lima2
 
     private void SetStyles()
     {
-      SetScale(new Vector2(0, 1));
+      Scale = new Vector2(0, 1);
 
       _isOverloadBlackout = true;
       UpdateOverloadStyle(false);
@@ -54,16 +54,16 @@ namespace Lima2
         _isOverloadBlackout = overload;
         if (_isOverloadBlackout)
         {
-          SetPixels(new Vector2(_width + 2, 1));
-          SetBorder(new Vector4(1));
-          SetBorderColor(Color.Red);
-          _overloadView.SetEnabled(true);
+          Pixels = new Vector2(_width + 2, 1);
+          Border = new Vector4(1);
+          BorderColor = Color.Red;
+          _overloadView.Enabled = true;
         }
         else
         {
-          SetPixels(new Vector2(_width, 1));
-          SetBorder(new Vector4(0));
-          _overloadView.SetEnabled(false);
+          Pixels = new Vector2(_width, 1);
+          Border = new Vector4(0);
+          _overloadView.Enabled = false;
         }
       }
     }
@@ -71,40 +71,40 @@ namespace Lima2
     private void CreateElements()
     {
       _progressBar = new FancyProgressBar(0, MaxValue, false, true);
-      _progressBar.SetPixels(new Vector2(_width, 0));
-      _progressBar.SetLabelScale(0.6f);
-      _progressBar.SetLabelAlignment(TextAlignment.CENTER);
+      _progressBar.Pixels = new Vector2(_width, 0);
+      _progressBar.LabelScale = 0.6f;
+      _progressBar.LabelAlignment = TextAlignment.CENTER;
       AddChild(_progressBar);
 
       _icon = new Icon("IconEnergy", new Vector2(_width));
-      _icon.SetAbsolute(true);
+      _icon.Absolute = true;
       AddChild(_icon);
 
       _inputArrow = new Icon("Triangle", new Vector2(20, 12));// MathHelper.Pi);
-      _inputArrow.SetAbsolute(true);
-      _inputArrow.SetEnabled(false);
+      _inputArrow.Absolute = true;
+      _inputArrow.Enabled = false;
       AddChild(_inputArrow);
 
       _outputArrow = new Icon("Triangle", new Vector2(20, 12), MathHelper.Pi);
-      _outputArrow.SetAbsolute(true);
-      _outputArrow.SetEnabled(false);
+      _outputArrow.Absolute = true;
+      _outputArrow.Enabled = false;
       AddChild(_outputArrow);
 
       _overloadView = new FancyView();
-      _overloadView.SetBgColor(Color.Red);
-      _overloadView.SetPadding(Vector4.UnitY * 1);
-      _overloadView.SetPixels(new Vector2(0, 12));
-      _overloadView.SetScale(new Vector2(1, 0));
+      _overloadView.BgColor = Color.Red;
+      _overloadView.Padding = Vector4.UnitY * 1;
+      _overloadView.Pixels = new Vector2(0, 12);
+      _overloadView.Scale = new Vector2(1, 0);
       AddChild(_overloadView);
 
       _overloadLabel = new FancyLabel("OVERLOAD", 0.35f, TextAlignment.CENTER);
       _overloadView.AddChild(_overloadLabel);
 
       _timeLeftView = new FancyView();
-      _timeLeftView.SetPadding(Vector4.UnitY * 1);
-      _timeLeftView.SetPixels(new Vector2(0, 14));
+      _timeLeftView.Padding = Vector4.UnitY * 1;
+      _timeLeftView.Pixels = new Vector2(0, 14);
       // _timeLeftView.SetScale(new Vector2(1, 0));
-      _timeLeftView.SetAbsolute(true);
+      _timeLeftView.Absolute = true;
       AddChild(_timeLeftView);
 
       _timeLeftLabel = new FancyLabel("00.0h", 0.4f, TextAlignment.CENTER);
@@ -113,27 +113,27 @@ namespace Lima2
 
     public void UpdateValues()
     {
-      _progressBar.SetLabel($"{((Value / MaxValue) * 100).ToString("0")}%");
-      _progressBar.SetValue(Value);
-      _progressBar.SetMaxValue(MaxValue);
+      var percentage = (Value / MaxValue);
+      _progressBar.Label = $"{(float.IsNaN(percentage) ? 0f : (percentage * 100)).ToString("0")}%";
+      _progressBar.Value = Value;
+      _progressBar.MaxValue = MaxValue;
 
-      _timeLeftLabel.SetText(ElectricNetworkInfoApp.HoursFormat(HoursLeft));
+      _timeLeftLabel.Text = ElectricNetworkInfoApp.HoursFormat(HoursLeft);
     }
 
     int _tick = 0;
     private void Update()
     {
-      var scale = GetApp().GetTheme().GetScale();
+      var scale = App.Theme.Scale;
       var size = GetSize();
-      var pos = GetPosition();
-      var mainColor = GetApp().GetTheme().GetColorMain();
+      var pos = Position;
+      var mainColor = App.Theme.MainColor;
 
-      // _timeLeftView.SetBgColor(GetApp().GetTheme().GetColorMainDarker(20));
-      _timeLeftView.SetPosition(pos - new Vector2(size.X / 2, 0));
-      _timeLeftView.SetPixels(new Vector2(size.X, 14));
+      _timeLeftView.Position = pos - new Vector2(size.X / 2, 0);
+      _timeLeftView.Pixels = new Vector2(size.X, 14);
 
       var iconPos = pos + new Vector2(0, size.Y / 2);
-      _icon.SetPosition(iconPos);
+      _icon.Position = iconPos;
       _icon.SpriteSize = new Vector2(size.X);
 
       _tick++;
@@ -145,24 +145,24 @@ namespace Lima2
       if (InputRatio > 0)
       {
         var animInput = anim * InputRatio;
-        _inputArrow.SetEnabled(true);
+        _inputArrow.Enabled = true;
         _inputArrow.SpriteSize = new Vector2(20, 12) * scale;
-        _inputArrow.SetPosition(iconPos + new Vector2(size.X / 2 - scale * (_inputArrow.SpriteSize.X / 2), animInput * -(_icon.SpriteSize.Y)));
+        _inputArrow.Position = iconPos + new Vector2(size.X / 2 - scale * (_inputArrow.SpriteSize.X / 2), animInput * -(_icon.SpriteSize.Y));
         _inputArrow.SpriteColor = new Color(mainColor, animInput * 1f);
       }
       else
-        _inputArrow.SetEnabled(false);
+        _inputArrow.Enabled = false;
 
       if (OutputRatio > 0)
       {
         var animOutput = anim * OutputRatio;
-        _outputArrow.SetEnabled(true);
+        _outputArrow.Enabled = true;
         _outputArrow.SpriteSize = new Vector2(20, 12) * scale;
-        _outputArrow.SetPosition(iconPos + new Vector2(size.X / 2 - scale * (_inputArrow.SpriteSize.X / 2), animOutput * (_icon.SpriteSize.Y)));
+        _outputArrow.Position = iconPos + new Vector2(size.X / 2 - scale * (_inputArrow.SpriteSize.X / 2), animOutput * (_icon.SpriteSize.Y));
         _outputArrow.SpriteColor = new Color(mainColor, animOutput * 1f);
       }
       else
-        _outputArrow.SetEnabled(false);
+        _outputArrow.Enabled = false;
     }
   }
 }

@@ -28,22 +28,22 @@ namespace Lima2
 
     private void Update()
     {
-      SetBgColor(GetApp().GetTheme().GetColorMainDarker(40));
+      BgColor = App.Theme.GetMainColorDarker(4);
 
-      _titleLabel.SetTextColor(GetApp().GetTheme().GetColorMain());
-      _countLabel.SetTextColor(GetApp().GetTheme().GetColorMain());
+      _titleLabel.TextColor = App.Theme.MainColor;
+      _countLabel.TextColor = App.Theme.MainColor;
     }
 
     private void SetStyles()
     {
-      SetPadding(new Vector4(2));
+      Padding = new Vector4(2);
     }
 
     private void CreateElements()
     {
       _titleView = new FancyView(ViewDirection.Row);
-      _titleView.SetScale(new Vector2(1, 0));
-      _titleView.SetPixels(new Vector2(0, 14));
+      _titleView.Scale = new Vector2(1, 0);
+      _titleView.Pixels = new Vector2(0, 14);
       AddChild(_titleView);
 
       _titleLabel = new FancyLabel(Title, 0.4f, TextAlignment.LEFT);
@@ -53,22 +53,22 @@ namespace Lima2
       _titleView.AddChild(_countLabel);
 
       _progressBar = new FancyProgressBar(0, MaxValue, false);
-      _progressBar.SetScale(new Vector2(1, 0));
-      _progressBar.SetPixels(new Vector2(0, 16));
-      _progressBar.SetLabelScale(0.35f);
+      _progressBar.Scale = new Vector2(1, 0);
+      _progressBar.Pixels = new Vector2(0, 16);
+      _progressBar.LabelScale = 0.35f;
       AddChild(_progressBar);
     }
 
     public void UpdateValues()
     {
-      _titleLabel.SetText(Title);
-      _countLabel.SetText(Count.ToString());
+      _titleLabel.Text = Title;
+      _countLabel.Text = Count.ToString();
 
       var sv = ElectricNetworkInfoApp.PowerFormat(Value);
 
-      _progressBar.SetLabel(sv);
-      _progressBar.SetMaxValue(MaxValue);
-      _progressBar.SetValue(Value);
+      _progressBar.Label = sv;
+      _progressBar.MaxValue = MaxValue;
+      _progressBar.Value = Value;
     }
   }
 }

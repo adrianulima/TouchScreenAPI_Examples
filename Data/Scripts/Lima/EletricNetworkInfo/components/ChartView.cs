@@ -13,8 +13,8 @@ namespace Lima2
     private List<float> _maxConsumptionHistory = new List<float>();
     private List<float> _productionHistory = new List<float>();
     private List<float> _maxProductionHistory = new List<float>();
-    private List<float> _batteryOutputHistory = new List<float>();
-    private List<float> _batteryMaxOutputHistory = new List<float>();
+    private List<float> _plusBatteryOutputHistory = new List<float>();
+    private List<float> _plusBatteryMaxOutputHistory = new List<float>();
 
     public int maxSamples = 1800; // 30 min
     private int _skip = 1;
@@ -36,29 +36,29 @@ namespace Lima2
 
     public void SetChartColors(Color bgColor, Color color)
     {
-      _chartView.SetBorderColor(bgColor);
-      _chartView.SetBorder(new Vector4(1));
-      _legendsView.SetBgColor(bgColor);
+      _chartView.BorderColor = bgColor;
+      _chartView.Border = new Vector4(1);
+      _legendsView.BgColor = bgColor;
 
       foreach (var leg in _legends)
         leg.UpdateTitleColor(color);
 
-      var min = _chart.GetMinValue();
+      var min = _chart.MinValue;
       if (min != float.MaxValue)
       {
         var len = _labels.Length;
-        var interval = (_chart.GetMaxValue() - min) / (len - 1);
+        var interval = (_chart.MaxValue - min) / (len - 1);
         if (interval > 0)
         {
           for (int i = 0; i < len; i++)
           {
-            _labels[i].SetEnabled(true);
-            _labels[i].SetTextColor(color);
-            _labels[i].SetText($"{ElectricNetworkInfoApp.PowerFormat(min + interval * (len - 1 - i), "0")}");
+            _labels[i].Enabled = true;
+            _labels[i].TextColor = color;
+            _labels[i].Text = $"{ElectricNetworkInfoApp.PowerFormat(min + interval * (len - 1 - i), "0")}";
           }
 
           var gap = (_labelsWrapper.GetSize().Y - (len * _labels[0].GetSize().Y)) / (len - 1);
-          _labelsWrapper.SetGap((int)gap);
+          _labelsWrapper.Gap = (int)gap;
         }
       }
     }
@@ -93,90 +93,90 @@ namespace Lima2
       AddChild(intervalSwitcher);
 
       _chartView = new FancyView(ViewDirection.Row);
-      _chartView.SetPadding(new Vector4(4));
+      _chartView.Padding = new Vector4(4);
       AddChild(_chartView);
 
       _labelsWrapper = new FancyView(ViewDirection.Column);
-      _labelsWrapper.SetScale(new Vector2(0, 1));
-      _labelsWrapper.SetPixels(new Vector2(50, 1));
+      _labelsWrapper.Scale = new Vector2(0, 1);
+      _labelsWrapper.Pixels = new Vector2(50, 1);
       _chartView.AddChild(_labelsWrapper);
 
       _labels = new FancyLabel[5];
       _labels[0] = new FancyLabel("1000 MW");
-      _labels[0].SetFontSize(0.4f);
-      _labels[0].SetEnabled(false);
-      _labels[0].SetAlignment(TextAlignment.RIGHT);
+      _labels[0].FontSize = 0.4f;
+      _labels[0].Enabled = false;
+      _labels[0].Alignment = TextAlignment.RIGHT;
       _labelsWrapper.AddChild(_labels[0]);
       _labels[1] = new FancyLabel("1000 MW");
-      _labels[1].SetFontSize(0.4f);
-      _labels[1].SetEnabled(false);
-      _labels[1].SetAlignment(TextAlignment.RIGHT);
+      _labels[1].FontSize = 0.4f;
+      _labels[1].Enabled = false;
+      _labels[1].Alignment = TextAlignment.RIGHT;
       _labelsWrapper.AddChild(_labels[1]);
       _labels[2] = new FancyLabel("1000 MW");
-      _labels[2].SetFontSize(0.4f);
-      _labels[2].SetEnabled(false);
-      _labels[2].SetAlignment(TextAlignment.RIGHT);
+      _labels[2].FontSize = 0.4f;
+      _labels[2].Enabled = false;
+      _labels[2].Alignment = TextAlignment.RIGHT;
       _labelsWrapper.AddChild(_labels[2]);
       _labels[3] = new FancyLabel("1000 MW");
-      _labels[3].SetFontSize(0.4f);
-      _labels[3].SetEnabled(false);
-      _labels[3].SetAlignment(TextAlignment.RIGHT);
+      _labels[3].FontSize = 0.4f;
+      _labels[3].Enabled = false;
+      _labels[3].Alignment = TextAlignment.RIGHT;
       _labelsWrapper.AddChild(_labels[3]);
       _labels[4] = new FancyLabel("1000 MW");
-      _labels[4].SetFontSize(0.4f);
-      _labels[4].SetEnabled(false);
-      _labels[4].SetAlignment(TextAlignment.RIGHT);
+      _labels[4].FontSize = 0.4f;
+      _labels[4].Enabled = false;
+      _labels[4].Alignment = TextAlignment.RIGHT;
       _labelsWrapper.AddChild(_labels[4]);
 
       var chartWrapper = new FancyView(ViewDirection.Row);
-      chartWrapper.SetMargin(new Vector4(4, 8, 0, 8));
+      chartWrapper.Margin = new Vector4(4, 8, 0, 8);
       _chartView.AddChild(chartWrapper);
 
       var intervals = 30;
       _chart = new FancyChart(intervals);
-      _dataSets = _chart.GetDataSets();
+      _dataSets = _chart.DataSets;
       _dataSets.Add(null);
       _dataSets.Add(null);
       _dataSets.Add(null);
       _dataSets.Add(null);
-      _chart.GetDataColors().Add(Color.DarkSlateGray);
-      _chart.GetDataColors().Add(Color.DarkGreen);
-      _chart.GetDataColors().Add(Color.SlateGray);
-      _chart.GetDataColors().Add(Color.OrangeRed);
-      _chart.SetGridHorizontalLines(5);
-      _chart.SetGridVerticalLines(13);
+      _chart.DataColors.Add(Color.DarkSlateGray);
+      _chart.DataColors.Add(Color.DarkGreen);
+      _chart.DataColors.Add(Color.SlateGray);
+      _chart.DataColors.Add(Color.OrangeRed);
+      _chart.GridHorizontalLines = 5;
+      _chart.GridVerticalLines = 13;
       chartWrapper.AddChild(_chart);
 
       _legendsView = new FancyView(ViewDirection.Row);
-      _legendsView.SetPadding(new Vector4(8, 2, 4, 2));
-      _legendsView.SetScale(new Vector2(1, 0));
-      _legendsView.SetPixels(new Vector2(0, 20));
+      _legendsView.Padding = new Vector4(8, 2, 4, 2);
+      _legendsView.Scale = new Vector2(1, 0);
+      _legendsView.Pixels = new Vector2(0, 20);
       AddChild(_legendsView);
 
       _legends = new LegendItem[4];
       _legends[0] = new LegendItem("Consumption", Color.OrangeRed);
-      _legends[0].SetMargin(Vector4.UnitY * 2);
+      _legends[0].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[0]);
       _legends[1] = new LegendItem("Max Consum.", Color.SlateGray);
-      _legends[1].SetMargin(Vector4.UnitY * 2);
+      _legends[1].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[1]);
       _legends[2] = new LegendItem("Production", Color.DarkGreen);
-      _legends[2].SetMargin(Vector4.UnitY * 2);
+      _legends[2].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[2]);
       _legends[3] = new LegendItem("Max Prod.", Color.DarkSlateGray);
-      _legends[3].SetMargin(Vector4.UnitY * 2);
+      _legends[3].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[3]);
 
       var checkboxLabel = new FancyLabel("Battery", 0.4f, TextAlignment.RIGHT);
-      checkboxLabel.SetMargin(new Vector4(0, 2, 4, 0));
-      checkboxLabel.SetScale(new Vector2(0.5f, 0));
+      checkboxLabel.Margin = new Vector4(0, 2, 4, 0);
+      checkboxLabel.Scale = new Vector2(0.5f, 0);
       _legendsView.AddChild(checkboxLabel);
       var checkbox = new FancyCheckbox((bool v) =>
       {
         BatteryOutputAsProduction = v;
         UpdateChartDataSets();
       }, BatteryOutputAsProduction);
-      checkbox.SetPixels(new Vector2(16));
+      checkbox.Pixels = new Vector2(16);
       _legendsView.AddChild(checkbox);
     }
 
@@ -186,8 +186,8 @@ namespace Lima2
       _maxConsumptionHistory.Add(maxConsumption);
       _productionHistory.Add(production);
       _maxProductionHistory.Add(maxProduction);
-      _batteryOutputHistory.Add(batteryOutput);
-      _batteryMaxOutputHistory.Add(batteryMaxOutput);
+      _plusBatteryOutputHistory.Add(production + batteryOutput);
+      _plusBatteryMaxOutputHistory.Add(maxProduction + batteryMaxOutput);
 
       TrimHistoryLimit();
 
@@ -201,14 +201,8 @@ namespace Lima2
       var count = 30;
       if (BatteryOutputAsProduction)
       {
-        _dataSets[0] = SumLists(
-          TakeOneEvery(TakeLast(_maxProductionHistory, count * _skip), _skip),
-          TakeOneEvery(TakeLast(_batteryMaxOutputHistory, count * _skip), _skip)
-        ).ToArray();
-        _dataSets[1] = SumLists(
-          TakeOneEvery(TakeLast(_productionHistory, count * _skip), _skip),
-          TakeOneEvery(TakeLast(_batteryOutputHistory, count * _skip), _skip)
-        ).ToArray();
+        _dataSets[0] = TakeOneEvery(TakeLast(_plusBatteryMaxOutputHistory, count * _skip), _skip).ToArray();
+        _dataSets[1] = TakeOneEvery(TakeLast(_plusBatteryOutputHistory, count * _skip), _skip).ToArray();
       }
       else
       {
@@ -231,11 +225,6 @@ namespace Lima2
       return list.Where((val, i) => i % n == 0);
     }
 
-    private IEnumerable<float> SumLists(IEnumerable<float> listA, IEnumerable<float> listB)
-    {
-      return listA.Zip(listB, (x, y) => x + y);
-    }
-
     private void TrimHistoryLimit()
     {
       while (_consumptionHistory.Count > maxSamples)
@@ -246,10 +235,10 @@ namespace Lima2
         _productionHistory.RemoveAt(0);
       while (_maxProductionHistory.Count > maxSamples)
         _maxProductionHistory.RemoveAt(0);
-      while (_batteryOutputHistory.Count > maxSamples)
-        _batteryOutputHistory.RemoveAt(0);
-      while (_batteryMaxOutputHistory.Count > maxSamples)
-        _batteryMaxOutputHistory.RemoveAt(0);
+      while (_plusBatteryOutputHistory.Count > maxSamples)
+        _plusBatteryOutputHistory.RemoveAt(0);
+      while (_plusBatteryMaxOutputHistory.Count > maxSamples)
+        _plusBatteryMaxOutputHistory.RemoveAt(0);
     }
   }
 }

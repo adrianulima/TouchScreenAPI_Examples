@@ -87,7 +87,7 @@ namespace Lima2
         Size = new Vector2(50, 50)
       };
       _squareHandler = new ClickHandler();
-      _squareHandler.SetHitArea(new Vector4(0, 0, 50, 50));
+      _squareHandler.HitArea = new Vector4(0, 0, 50, 50);
 
 
       _circle1 = new MySprite()
@@ -156,8 +156,8 @@ namespace Lima2
       base.Dispose();
 
       GameSession.Instance.Api.RemoveTouchScreen(_block, _surface);
-      _screen?.Dispose();
-      _cursor?.Dispose();
+      _screen?.ForceDispose();
+      _cursor?.ForceDispose();
       _terminalBlock.OnMarkForClose -= BlockMarkedForClose;
     }
 
@@ -170,18 +170,18 @@ namespace Lima2
     {
       _squareHandler.UpdateStatus(_screen);
 
-      if (_squareHandler.IsMousePressed())
+      if (_squareHandler.IsMousePressed)
       {
         _square.Color = Color.White;
         _custom = !_custom;
       }
-      else if (_squareHandler.IsMouseOver())
+      else if (_squareHandler.IsMouseOver)
         _square.Color = Color.BlueViolet;
       else
         _square.Color = Color.RoyalBlue;
 
       if (_custom)
-        _customCursor.Position = _screen.GetCursorPosition();
+        _customCursor.Position = _screen.CursorPosition;
 
       _rotation += 1;
       if (_rotation >= 360)
@@ -245,7 +245,7 @@ namespace Lima2
           if (_custom)
             frame.Add(_customCursor);
           else
-            frame.AddRange(_cursor.GetSprites());
+            frame.AddRange(_cursor.Sprites);
           frame.Dispose();
         }
       }
