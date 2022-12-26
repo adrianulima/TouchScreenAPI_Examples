@@ -7,7 +7,7 @@ using VRage;
 using VRage.Utils;
 using System.Text;
 
-namespace Lima2
+namespace Lima
 {
   public class ElectricNetworkInfoApp : FancyApp
   {
@@ -88,35 +88,27 @@ namespace Lima2
         return;
       _lastUpdate = _electricMan.Updatecount;
 
-      ConsumptionStatus.Value = _electricMan.Consumption;
-      ConsumptionStatus.MaxValue = _electricMan.MaxConsumption;
-      ProductionStatus.Value = _electricMan.Production;
-      ProductionStatus.MaxValue = _electricMan.MaxProduction;
-      BatteryOutputStatus.Value = _electricMan.BatteryOutput;
-      BatteryOutputStatus.MaxValue = _electricMan.BatteryMaxOutput;
-      BatteryStorageView.Value = _electricMan.BatteryCharge;
-      BatteryStorageView.MaxValue = _electricMan.BatteryMaxCharge;
-      BatteryStorageView.HoursLeft = _electricMan.BatteryHoursLeft;
-      BatteryStorageView.UpdateOverloadStyle(_electricMan.EnergyState == MyResourceStateEnum.OverloadBlackout);
+      ConsumptionStatus.Value = _electricMan.CurrentPowerStats.Consumption;
+      ConsumptionStatus.MaxValue = _electricMan.CurrentPowerStats.MaxConsumption;
+      ProductionStatus.Value = _electricMan.CurrentPowerStats.Production;
+      ProductionStatus.MaxValue = _electricMan.CurrentPowerStats.MaxProduction;
+      BatteryOutputStatus.Value = _electricMan.CurrentPowerStats.BatteryOutput;
+      BatteryOutputStatus.MaxValue = _electricMan.CurrentPowerStats.BatteryMaxOutput;
+      BatteryStorageView.Value = _electricMan.CurrentBatteryStats.BatteryCharge;
+      BatteryStorageView.MaxValue = _electricMan.CurrentBatteryStats.BatteryMaxCharge;
+      BatteryStorageView.HoursLeft = _electricMan.CurrentBatteryStats.BatteryHoursLeft;
+      BatteryStorageView.UpdateOverloadStatus(_electricMan.CurrentBatteryStats.EnergyState == MyResourceStateEnum.OverloadBlackout);
 
-      var inputRatio = _electricMan.BatteryInput / _electricMan.BatteryMaxInput;
+      var inputRatio = _electricMan.CurrentBatteryStats.BatteryInput / _electricMan.CurrentBatteryStats.BatteryMaxInput;
       BatteryStorageView.InputRatio = float.IsNaN(inputRatio) ? 0f : inputRatio;
-      var outputRatio = _electricMan.BatteryOutput / _electricMan.BatteryMaxOutput;
+      var outputRatio = _electricMan.CurrentPowerStats.BatteryOutput / _electricMan.CurrentPowerStats.BatteryMaxOutput;
       BatteryStorageView.OutputRatio = float.IsNaN(outputRatio) ? 0f : outputRatio;
 
       ConsumptionStatus.UpdateValues();
       ProductionStatus.UpdateValues();
       BatteryOutputStatus.UpdateValues();
       BatteryStorageView.UpdateValues();
-
-      Charts.UpdateValues(
-        _electricMan.Consumption,
-        _electricMan.MaxConsumption,
-        _electricMan.Production,
-        _electricMan.MaxProduction,
-        _electricMan.BatteryOutput,
-        _electricMan.BatteryMaxOutput
-      );
+      Charts.UpdateValues(_electricMan.PowerStatsHistory);
 
       var bgColor = Theme.GetMainColorDarker(1);
 
@@ -130,7 +122,7 @@ namespace Lima2
         var entity = new EntityItem(item.Key);
         entity.Count = (int)item.Value.X;
         entity.Value = item.Value.Y;
-        entity.MaxValue = _electricMan.Production + _electricMan.BatteryOutput;
+        entity.MaxValue = _electricMan.CurrentPowerStats.Production + _electricMan.CurrentPowerStats.BatteryOutput;
         entity.UpdateValues();
         ProductionList.AddItem(entity);
       }
@@ -146,7 +138,7 @@ namespace Lima2
         var entity = new EntityItem(item.Key);
         entity.Count = (int)item.Value.X;
         entity.Value = item.Value.Y;
-        entity.MaxValue = _electricMan.Consumption;
+        entity.MaxValue = _electricMan.CurrentPowerStats.Consumption;
         entity.UpdateValues();
         ConsumptionList.AddItem(entity);
       }

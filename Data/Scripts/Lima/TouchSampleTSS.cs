@@ -9,7 +9,7 @@ using VRage.Utils;
 using VRageMath;
 using Lima.API;
 
-namespace Lima2
+namespace Lima
 {
   [MyTextSurfaceScript("Touch_Sample", "Touch Sample")]
   public class TouchSampleTSS : MyTSSCommon

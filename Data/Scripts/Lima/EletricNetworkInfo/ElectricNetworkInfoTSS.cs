@@ -8,7 +8,7 @@ using VRage.ModAPI;
 using VRage.Utils;
 using VRageMath;
 
-namespace Lima2
+namespace Lima
 {
   [MyTextSurfaceScript("FancyUI_ElectricNetworkInfo", "Electric Network Info")]
   public class ElectricNetworkInfoTSS : MyTSSCommon
@@ -51,9 +51,9 @@ namespace Lima2
         return;
       _init = true;
 
-      GameSession.Instance.ElectricMan.Init(_block);
+      var electricManager = GameSession.Instance.GetElectricManagerForBlock(_block);
 
-      _app = new ElectricNetworkInfoApp(GameSession.Instance.ElectricMan);
+      _app = new ElectricNetworkInfoApp(electricManager);
       _app.InitApp(this.Block as MyCubeBlock, this.Surface as IMyTextSurface);
       _app.CreateElements();
       _app.InitElements();
@@ -65,6 +65,8 @@ namespace Lima2
     public override void Dispose()
     {
       base.Dispose();
+
+      GameSession.Instance.RemoveManagerFromBlock(_block);
 
       _app?.Dispose();
       _terminalBlock.OnMarkForClose -= BlockMarkedForClose;

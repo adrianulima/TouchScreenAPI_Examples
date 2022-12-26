@@ -15,34 +15,44 @@ using VRage;
 using Sandbox.Definitions;
 using Sandbox.Game.GameSystems;
 using SpaceEngineers.Game.ModAPI;
+using System.Linq;
 
-namespace Lima2
+namespace Lima
 {
   public class ElectricNetworkManager
   {
-    private bool _init = false;
-    private IMyCubeBlock _lcdBlock;
+    public struct PowerStats
+    {
+      public float Consumption;
+      public float MaxConsumption;
+      public float Production;
+      public float MaxProduction;
+      public float BatteryOutput;
+      public float BatteryMaxOutput;
+    }
 
-    private MyDefinitionId _elec = MyResourceDistributorComponent.ElectricityId;
+    public struct BatteryStats
+    {
+      public float BatteryInput;
+      public float BatteryMaxInput;
+      public float BatteryCharge;
+      public float BatteryMaxCharge;
+      public float BatteryHoursLeft;
+      public MyResourceStateEnum EnergyState;
+    }
+
+    private readonly List<IMyCubeBlock> _lcdBlocks;
+    private MyDefinitionId _electricityId = MyResourceDistributorComponent.ElectricityId;
 
     public const int TicksPerSecond = (int)((MyEngineConstants.UPDATE_STEPS_PER_MINUTE / 60));
     private int _tick = TicksPerSecond - 1;
     public int Updatecount = 0;
 
-    public float Consumption { get; private set; }
-    public float MaxConsumption { get; private set; }
+    public PowerStats CurrentPowerStats = new PowerStats();
+    public BatteryStats CurrentBatteryStats = new BatteryStats();
 
-    public float Production { get; private set; }
-    public float MaxProduction { get; private set; }
-    public float BatteryInput { get; private set; }
-    public float BatteryMaxInput { get; private set; }
-    public float BatteryOutput { get; private set; }
-    public float BatteryMaxOutput { get; private set; }
-
-    public float BatteryCharge { get; private set; }
-    public float BatteryMaxCharge { get; private set; }
-    public MyResourceStateEnum EnergyState { get; private set; }
-    public float BatteryHoursLeft { get; private set; }
+    public int MaxHistory = 1800; // 30 min
+    public readonly List<PowerStats> PowerStatsHistory = new List<PowerStats>();
 
     private readonly List<IMyCubeGrid> _grids = new List<IMyCubeGrid>();
 
@@ -50,15 +60,23 @@ namespace Lima2
     private readonly List<MyCubeBlock> _outputList = new List<MyCubeBlock>();
     private readonly List<MyCubeBlock> _thrustersList = new List<MyCubeBlock>();
 
-    public Dictionary<string, Vector2> ProductionBlocks = new Dictionary<string, Vector2>();
-    public Dictionary<string, Vector2> ConsumptionBlocks = new Dictionary<string, Vector2>();
+    public readonly Dictionary<string, Vector2> ProductionBlocks = new Dictionary<string, Vector2>();
+    public readonly Dictionary<string, Vector2> ConsumptionBlocks = new Dictionary<string, Vector2>();
 
-    public ElectricNetworkManager()
+    public ElectricNetworkManager(IMyCubeBlock lcdBlock)
     {
-      Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage("new ElectricNetworkManager", "Electric");
+      _lcdBlocks = new List<IMyCubeBlock>() { lcdBlock };
+      HandleGrid(lcdBlock.CubeGrid);
     }
 
     public void Dispose()
+    {
+      Clear();
+      PowerStatsHistory.Clear();
+      _lcdBlocks.Clear();
+    }
+
+    public void Clear()
     {
       Updatecount = 0;
       _grids.Clear();
@@ -74,14 +92,6 @@ namespace Lima2
         grid.OnBlockRemoved -= OnBlockRemovedFromGrid;
         grid.OnConnectionChanged -= OnConnectGrid;
       }
-    }
-
-    public void Init(IMyCubeBlock lcdBlock)
-    {
-      _init = true;
-      _lcdBlock = lcdBlock;
-
-      HandleGrid(_lcdBlock.CubeGrid);
     }
 
     private void HandleGrid(IMyCubeGrid cubeGrid)
@@ -113,14 +123,14 @@ namespace Lima2
       else
       {
         var thruster = block as MyThrust;
-        if (thruster != null && thruster.FuelDefinition.Id == _elec)
+        if (thruster != null && thruster.FuelDefinition.Id == _electricityId)
         {
           _thrustersList.Add(block);
         }
         else
         {
           MyResourceSinkComponent sink = block.Components?.Get<MyResourceSinkComponent>();
-          if (sink != null && sink.AcceptedResources.IndexOf(_elec) != -1)
+          if (sink != null && sink.AcceptedResources.IndexOf(_electricityId) != -1)
           {
             _inputList.Add(block);
           }
@@ -128,7 +138,7 @@ namespace Lima2
       }
 
       var source = block.Components?.Get<MyResourceSourceComponent>();
-      if (source != null && source.ResourceTypes.IndexOf(_elec) != -1)
+      if (source != null && source.ResourceTypes.IndexOf(_electricityId) != -1)
       {
         _outputList.Add(block);
       }
@@ -138,8 +148,8 @@ namespace Lima2
     {
       if (linkType == GridLinkTypeEnum.Electrical)
       {
-        Dispose();
-        HandleGrid(_lcdBlock.CubeGrid);
+        Clear();
+        HandleGrid(_lcdBlocks[0].CubeGrid);
       }
     }
 
@@ -162,6 +172,31 @@ namespace Lima2
       _thrustersList.Remove(block);
     }
 
+    public bool AddBlockIfSameGrid(IMyCubeBlock lcdBlock)
+    {
+      if (_lcdBlocks[0].CubeGrid == lcdBlock.CubeGrid)
+      {
+        if (!_lcdBlocks.Contains(lcdBlock))
+          _lcdBlocks.Add(lcdBlock);
+
+        return true;
+      }
+      return false;
+    }
+
+    public bool RemoveBlockAndCount(IMyCubeBlock lcdBlock)
+    {
+      if (_grids.Contains(lcdBlock.CubeGrid))
+      {
+        if (_lcdBlocks.Contains(lcdBlock))
+        {
+          _lcdBlocks.Remove(lcdBlock);
+          return _lcdBlocks.Count == 0;
+        }
+      }
+      return false;
+    }
+
     private void UpdatePowerDict(Dictionary<string, Vector2> dict, MyCubeBlock block, float power)
     {
       Vector2 count = Vector2.Zero;
@@ -173,34 +208,25 @@ namespace Lima2
 
     private void UpdateDistributiorStatus()
     {
-      MyResourceDistributorComponent distributor = _lcdBlock.CubeGrid.ResourceDistributor as MyResourceDistributorComponent;
-      var grid = _lcdBlock.CubeGrid as MyCubeGrid;
-      BatteryHoursLeft = distributor.RemainingFuelTimeByType(MyResourceDistributorComponent.ElectricityId, grid: grid);
-      EnergyState = distributor.ResourceStateByType(MyResourceDistributorComponent.ElectricityId, grid: grid);
+      MyResourceDistributorComponent distributor = _lcdBlocks[0].CubeGrid.ResourceDistributor as MyResourceDistributorComponent;
+      var grid = _lcdBlocks[0].CubeGrid as MyCubeGrid;
+      CurrentBatteryStats.BatteryHoursLeft = distributor.RemainingFuelTimeByType(MyResourceDistributorComponent.ElectricityId, grid: grid);
+      CurrentBatteryStats.EnergyState = distributor.ResourceStateByType(MyResourceDistributorComponent.ElectricityId, grid: grid);
     }
 
     public void Update()
     {
-      if (!_init) return;
-
       _tick++;
       if (_tick % (TicksPerSecond * 1) != 0)// 1 second
         return;
       _tick = 0;
+
       Updatecount++;
 
       UpdateDistributiorStatus();
 
-      MaxConsumption = 0;
-      Consumption = 0;
-      Production = 0;
-      MaxProduction = 0;
-      BatteryInput = 0;
-      BatteryMaxInput = 0;
-      BatteryOutput = 0;
-      BatteryMaxOutput = 0;
-      BatteryCharge = 0;
-      BatteryMaxCharge = 0;
+      CurrentPowerStats = new PowerStats();
+      CurrentBatteryStats = new BatteryStats();
 
       ProductionBlocks.Clear();
       ConsumptionBlocks.Clear();
@@ -209,8 +235,8 @@ namespace Lima2
       {
         MyThrust thrust = block as MyThrust;
         var cons = thrust.MinPowerConsumption + thrust.CurrentStrength * (thrust.MaxPowerConsumption - thrust.MinPowerConsumption);
-        Consumption += cons;
-        MaxConsumption += cons;
+        CurrentPowerStats.Consumption += cons;
+        CurrentPowerStats.MaxConsumption += cons;
 
         UpdatePowerDict(ConsumptionBlocks, block, cons);
       }
@@ -220,33 +246,33 @@ namespace Lima2
         MyResourceSinkComponent sink = block.Components?.Get<MyResourceSinkComponent>();
         if (sink != null)
         {
-          var cons = sink.CurrentInputByType(_elec);
-          Consumption += cons;
+          var cons = sink.CurrentInputByType(_electricityId);
+          CurrentPowerStats.Consumption += cons;
 
           IMyBatteryBlock battery = block as IMyBatteryBlock;
           if (battery != null)
           {
-            BatteryCharge += battery.CurrentStoredPower;
-            BatteryMaxCharge += battery.MaxStoredPower;
+            CurrentBatteryStats.BatteryCharge += battery.CurrentStoredPower;
+            CurrentBatteryStats.BatteryMaxCharge += battery.MaxStoredPower;
 
             if (battery.ChargeMode == Sandbox.ModAPI.Ingame.ChargeMode.Recharge)
-              MaxConsumption += sink.MaxRequiredInputByType(_elec);
+              CurrentPowerStats.MaxConsumption += sink.MaxRequiredInputByType(_electricityId);
             else
-              MaxConsumption += cons;
+              CurrentPowerStats.MaxConsumption += cons;
 
-            BatteryInput = cons;
-            BatteryMaxInput = sink.MaxRequiredInputByType(_elec);
+            CurrentBatteryStats.BatteryInput = cons;
+            CurrentBatteryStats.BatteryMaxInput = sink.MaxRequiredInputByType(_electricityId);
           }
           else
           {
             if (block is IMyBeacon)
-              MaxConsumption += Math.Max(cons, sink.MaxRequiredInputByType(_elec) / 1000f);
+              CurrentPowerStats.MaxConsumption += Math.Max(cons, sink.MaxRequiredInputByType(_electricityId) / 1000f);
             else if (block is IMyRadioAntenna)
-              MaxConsumption += Math.Max(cons, sink.MaxRequiredInputByType(_elec) * 100f);
+              CurrentPowerStats.MaxConsumption += Math.Max(cons, sink.MaxRequiredInputByType(_electricityId) * 100f);
             else if (block is IMyMedicalRoom)
-              MaxConsumption += Math.Max(cons, sink.MaxRequiredInputByType(_elec) / 100f);
+              CurrentPowerStats.MaxConsumption += Math.Max(cons, sink.MaxRequiredInputByType(_electricityId) / 100f);
             else
-              MaxConsumption += Math.Max(cons, sink.MaxRequiredInputByType(_elec));
+              CurrentPowerStats.MaxConsumption += Math.Max(cons, sink.MaxRequiredInputByType(_electricityId));
           }
 
           UpdatePowerDict(ConsumptionBlocks, block, cons);
@@ -258,24 +284,30 @@ namespace Lima2
         var source = block.Components?.Get<MyResourceSourceComponent>();
         if (source != null)
         {
-          var prod = source.CurrentOutputByType(_elec);
+          var prod = source.CurrentOutputByType(_electricityId);
           if (block is IMyBatteryBlock)
           {
-            BatteryOutput += prod;
-            BatteryMaxOutput += source.MaxOutputByType(_elec);
+            CurrentPowerStats.BatteryOutput += prod;
+            CurrentPowerStats.BatteryMaxOutput += source.MaxOutputByType(_electricityId);
           }
           else
           {
-            Production += prod;
-            MaxProduction += source.MaxOutputByType(_elec);
+            CurrentPowerStats.Production += prod;
+            CurrentPowerStats.MaxProduction += source.MaxOutputByType(_electricityId);
           }
           UpdatePowerDict(ProductionBlocks, block, prod);
         }
       }
 
-      // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{block.DefinitionDisplayNameText} {Math.Max(cons, sink.MaxRequiredInputByType(_elec))}", "Electric");
-      // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{Consumption}/{MaxConsumption}", "Electric");
-      // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{Production}/{MaxProduction}", "Electric");
+      PowerStatsHistory.Add(CurrentPowerStats);
+
+      // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{CurrentPowerStats.Production}", "Electric");
+    }
+
+    private void TrimHistoryLimit()
+    {
+      while (PowerStatsHistory.Count > MaxHistory)
+        PowerStatsHistory.RemoveAt(0);
     }
   }
 }

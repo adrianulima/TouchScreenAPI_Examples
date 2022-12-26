@@ -4,7 +4,7 @@ using Lima.API;
 using System.Linq;
 using VRage.Game.GUI.TextPanel;
 
-namespace Lima2
+namespace Lima
 {
   public class EntityListView : FancyView
   {

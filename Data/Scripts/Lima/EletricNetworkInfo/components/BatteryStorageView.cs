@@ -3,7 +3,7 @@ using VRageMath;
 using Lima.API;
 using VRage.Game.GUI.TextPanel;
 
-namespace Lima2
+namespace Lima
 {
   public class BatteryStorageView : FancyView
   {
@@ -44,10 +44,10 @@ namespace Lima2
       Scale = new Vector2(0, 1);
 
       _isOverloadBlackout = true;
-      UpdateOverloadStyle(false);
+      UpdateOverloadStatus(false);
     }
 
-    public void UpdateOverloadStyle(bool overload)
+    public void UpdateOverloadStatus(bool overload)
     {
       if (_isOverloadBlackout != overload)
       {

@@ -8,7 +8,7 @@ using VRage.ModAPI;
 using VRage.Utils;
 using VRageMath;
 
-namespace Lima2
+namespace Lima
 {
   [MyTextSurfaceScript("FancyUI_Sample", "FancyUI Sample")]
   public class FancySampleTSS : MyTSSCommon

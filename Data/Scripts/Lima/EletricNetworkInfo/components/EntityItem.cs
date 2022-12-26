@@ -3,7 +3,7 @@ using VRageMath;
 using Lima.API;
 using VRage.Game.GUI.TextPanel;
 
-namespace Lima2
+namespace Lima
 {
   public class EntityItem : FancyView
   {

@@ -5,18 +5,11 @@ using System;
 using VRage.Game.GUI.TextPanel;
 using System.Linq;
 
-namespace Lima2
+namespace Lima
 {
   public class ChartView : FancyView
   {
-    private List<float> _consumptionHistory = new List<float>();
-    private List<float> _maxConsumptionHistory = new List<float>();
-    private List<float> _productionHistory = new List<float>();
-    private List<float> _maxProductionHistory = new List<float>();
-    private List<float> _plusBatteryOutputHistory = new List<float>();
-    private List<float> _plusBatteryMaxOutputHistory = new List<float>();
-
-    public int maxSamples = 1800; // 30 min
+    private List<ElectricNetworkManager.PowerStats> _history;
     private int _skip = 1;
 
     private FancyChart _chart;
@@ -185,65 +178,54 @@ namespace Lima2
       _legendsView.AddChild(checkbox);
     }
 
-    public void UpdateValues(float consumption, float maxConsumption, float production, float maxProduction, float batteryOutput, float batteryMaxOutput)
+    public void UpdateValues(List<ElectricNetworkManager.PowerStats> history)
     {
-      _consumptionHistory.Add(consumption);
-      _maxConsumptionHistory.Add(maxConsumption);
-      _productionHistory.Add(production);
-      _maxProductionHistory.Add(maxProduction);
-      _plusBatteryOutputHistory.Add(production + batteryOutput);
-      _plusBatteryMaxOutputHistory.Add(maxProduction + batteryMaxOutput);
-
-      TrimHistoryLimit();
+      _history = history;
 
       // Prevent calling these methods every second if they won't give different results
-      if (_skip == 1 || _maxProductionHistory.Count % _skip == 0)
+      if (_skip == 1 || _history.Count % _skip == 0)
         UpdateChartDataSets();
     }
 
     private void UpdateChartDataSets()
     {
+      if (_history == null) return;
+
       var count = 30;
-      if (BatteryOutputAsProduction)
+      var subSet = TakeOneEvery(TakeLast(_history, count * _skip), _skip).ToArray();
+      var len = subSet.Length;
+
+      _dataSets[0] = new float[len];
+      _dataSets[1] = new float[len];
+      _dataSets[2] = new float[len];
+      _dataSets[3] = new float[len];
+      for (int i = 0; i < len; i++)
       {
-        _dataSets[0] = TakeOneEvery(TakeLast(_plusBatteryMaxOutputHistory, count * _skip), _skip).ToArray();
-        _dataSets[1] = TakeOneEvery(TakeLast(_plusBatteryOutputHistory, count * _skip), _skip).ToArray();
+        if (BatteryOutputAsProduction)
+        {
+          _dataSets[0][i] = subSet[i].MaxProduction + subSet[i].BatteryMaxOutput;
+          _dataSets[1][i] = subSet[i].Production + subSet[i].BatteryOutput;
+        }
+        else
+        {
+          _dataSets[0][i] = subSet[i].MaxProduction;
+          _dataSets[1][i] = subSet[i].Production;
+        }
+        _dataSets[2][i] = subSet[i].MaxConsumption;
+        _dataSets[3][i] = subSet[i].Consumption;
       }
-      else
-      {
-        _dataSets[0] = TakeOneEvery(TakeLast(_maxProductionHistory, count * _skip), _skip).ToArray();
-        _dataSets[1] = TakeOneEvery(TakeLast(_productionHistory, count * _skip), _skip).ToArray();
-      }
-      _dataSets[3] = TakeOneEvery(TakeLast(_consumptionHistory, count * _skip), _skip).ToArray();
-      _dataSets[2] = TakeOneEvery(TakeLast(_maxConsumptionHistory, count * _skip), _skip).ToArray();
     }
 
-    private IEnumerable<float> TakeLast(IEnumerable<float> list, int n)
+    private IEnumerable<ElectricNetworkManager.PowerStats> TakeLast(IEnumerable<ElectricNetworkManager.PowerStats> list, int n)
     {
       return list.Skip(Math.Max(0, list.Count() - n));
     }
 
-    private IEnumerable<float> TakeOneEvery(IEnumerable<float> list, int n)
+    private IEnumerable<ElectricNetworkManager.PowerStats> TakeOneEvery(IEnumerable<ElectricNetworkManager.PowerStats> list, int n)
     {
       if (n <= 1)
         return list;
       return list.Where((val, i) => i % n == 0);
-    }
-
-    private void TrimHistoryLimit()
-    {
-      while (_consumptionHistory.Count > maxSamples)
-        _consumptionHistory.RemoveAt(0);
-      while (_maxConsumptionHistory.Count > maxSamples)
-        _maxConsumptionHistory.RemoveAt(0);
-      while (_productionHistory.Count > maxSamples)
-        _productionHistory.RemoveAt(0);
-      while (_maxProductionHistory.Count > maxSamples)
-        _maxProductionHistory.RemoveAt(0);
-      while (_plusBatteryOutputHistory.Count > maxSamples)
-        _plusBatteryOutputHistory.RemoveAt(0);
-      while (_plusBatteryMaxOutputHistory.Count > maxSamples)
-        _plusBatteryMaxOutputHistory.RemoveAt(0);
     }
   }
 }

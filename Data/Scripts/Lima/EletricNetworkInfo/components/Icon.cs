@@ -2,7 +2,7 @@ using Lima.API;
 using VRage.Game.GUI.TextPanel;
 using VRageMath;
 
-namespace Lima2
+namespace Lima
 {
   public class Icon : FancyEmptyElement
   {

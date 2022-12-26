@@ -1,10 +1,10 @@
-using System;
+using System.Collections.Generic;
 using Lima.API;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
-using VRage.Utils;
+using VRage.Game.ModAPI;
 
-namespace Lima2
+namespace Lima
 {
   [MySessionComponentDescriptor(MyUpdateOrder.AfterSimulation)]
   public class GameSession : MySessionComponentBase
@@ -12,7 +12,7 @@ namespace Lima2
     public TouchScreenAPI Api { get; private set; }
     public static GameSession Instance;
 
-    public ElectricNetworkManager ElectricMan;
+    private List<ElectricNetworkManager> _electricManagers;
 
     public override void LoadData()
     {
@@ -21,24 +21,55 @@ namespace Lima2
 
       Instance = this;
       Api = new TouchScreenAPI();
-      ElectricMan = new ElectricNetworkManager();
       Api.Load();
+    }
+
+    public ElectricNetworkManager GetElectricManagerForBlock(IMyCubeBlock lcdBlock)
+    {
+      if (_electricManagers != null)
+      {
+        foreach (var manager in _electricManagers)
+          if (manager.AddBlockIfSameGrid(lcdBlock))
+            return manager;
+      }
+      else
+        _electricManagers = new List<ElectricNetworkManager>();
+
+      var newManager = new ElectricNetworkManager(lcdBlock);
+      _electricManagers.Add(newManager);
+      return newManager;
+    }
+
+    public void RemoveManagerFromBlock(IMyCubeBlock lcdBlock)
+    {
+      if (_electricManagers != null)
+      {
+        foreach (var manager in _electricManagers)
+          if (manager.RemoveBlockAndCount(lcdBlock))
+          {
+            manager.Dispose();
+            _electricManagers.Remove(manager);
+            return;
+          }
+      }
     }
 
     protected override void UnloadData()
     {
-      ElectricMan.Dispose();
+      if (_electricManagers != null)
+        foreach (var manager in _electricManagers)
+          manager.Dispose();
 
       Api?.Unload();
       Instance = null;
+      _electricManagers = null;
     }
 
     public override void UpdateAfterSimulation()
     {
-      if (ElectricMan == null)
-        return;
-
-      ElectricMan.Update();
+      if (_electricManagers != null)
+        foreach (var manager in _electricManagers)
+          manager.Update();
     }
   }
 }
