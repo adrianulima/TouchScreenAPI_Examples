@@ -36,7 +36,7 @@ namespace Lima
     int n2 = 6;
     MySprite[] _circle;
     private int _rotation = 0;
-    private float _pitch = 0.35f;
+    private float _pitch = 0;
 
     private float[] _lati;
     private float[] _long;
@@ -93,9 +93,9 @@ namespace Lima
       _circle1 = new MySprite()
       {
         Type = SpriteType.TEXTURE,
-        Data = "Circle",
-        RotationOrScale = 0,
-        Color = new Color(Color.RoyalBlue, 0.1f),
+        Data = "SemiCircle",
+        RotationOrScale = MathHelper.PiOver2 + MathHelper.PiOver4,
+        Color = new Color(Color.RoyalBlue * 0.6f, 1),
         Position = new Vector2(512 / 2 - 300 / 2, 512 / 2),
         Size = new Vector2(300, 300)
       };
@@ -103,22 +103,22 @@ namespace Lima
       _circle2 = new MySprite()
       {
         Type = SpriteType.TEXTURE,
-        Data = "Circle",
+        Data = "SemiCircle",
         // RotationOrScale = -0.655f,
-        RotationOrScale = 0,
-        Color = new Color(Color.RoyalBlue, 0.3f),
-        Position = new Vector2(512 / 2 - 270 / 2, 512 / 2 - 29),
-        Size = new Vector2(270, 240)
+        RotationOrScale = -MathHelper.PiOver2 + MathHelper.PiOver4,
+        Color = new Color(Color.RoyalBlue * 0.2f, 1),
+        Position = new Vector2(512 / 2 - 300 / 2, 512 / 2),
+        Size = new Vector2(300, 300)
       };
 
       _circle3 = new MySprite()
       {
         Type = SpriteType.TEXTURE,
         Data = "Circle",
-        RotationOrScale = 0,
-        Color = new Color(Color.RoyalBlue, 0.6f),
-        Position = new Vector2(512 / 2 - 70 / 2, 512 / 2 - 80),
-        Size = new Vector2(70, 60)
+        RotationOrScale = MathHelper.PiOver4,
+        Color = new Color(Color.RoyalBlue * 0.6f, 1),
+        Position = new Vector2(512 / 2 - 35, 512 / 2),
+        Size = new Vector2(70, 300)
       };
 
 
@@ -183,7 +183,7 @@ namespace Lima
       if (_custom)
         _customCursor.Position = _screen.CursorPosition;
 
-      _rotation += 1;
+      _rotation += 5;
       if (_rotation >= 360)
         _rotation = 0;
 
@@ -200,7 +200,7 @@ namespace Lima
 
 
         var sz = (float)(-z / _radius);
-        y -= sz * 30;
+        // y -= sz * 30;
 
         var size = new Vector2(2, 2) + new Vector2(3, 3) * sz;
         _circle[i].Size = size;
@@ -210,7 +210,38 @@ namespace Lima
         _circle[i].RotationOrScale = sz > 0 ? 1 : -1;
       }
 
-      // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{(_cursor.GetPosition().Y / 512) * Math.PI}", "SampleApp");
+
+      //
+      if (_rotation <= 180)
+      {
+        _circle1.Color = new Color(Color.RoyalBlue * 0.2f, 1);
+        _circle2.Color = new Color(Color.RoyalBlue * 0.6f, 1);
+      }
+      else
+      {
+        _circle1.Color = new Color(Color.RoyalBlue * 0.6f, 1);
+        _circle2.Color = new Color(Color.RoyalBlue * 0.2f, 1);
+      }
+
+      if (_rotation > 90 && _rotation <= 270)
+        _circle3.Color = new Color(Color.RoyalBlue * 0.2f, 1);
+      else
+        _circle3.Color = new Color(Color.RoyalBlue * 0.6f, 1);
+
+      var rot = ((90 - (_rotation % 90f)) / 90f);
+      if ((_rotation >= 90 && _rotation < 180) || _rotation >= 270)
+        rot = 1 - rot;
+
+      var sx = rot * 300f;
+      _circle3.Size = new Vector2(sx == 0 ? Math.Sign(sx) : sx, 300);
+      _circle3.Position = new Vector2(512 / 2 - sx / 2, 512 / 2);
+
+      // _pitch = ((_rotation - 180f) / 180f) * MathHelper.Pi;
+      _circle1.RotationOrScale = MathHelper.PiOver2 + _pitch;
+      _circle2.RotationOrScale = -MathHelper.PiOver2 + _pitch;
+      _circle3.RotationOrScale = _pitch;
+
+      // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{_rotation}", "SampleApp");
     }
 
     public override void Run()
@@ -234,13 +265,13 @@ namespace Lima
           frame.Add(_square);
           frame.Add(_circle1);
           frame.Add(_circle2);
-          // frame.Add(_circle3);
+          frame.Add(_circle3);
 
-          for (int i = 0; i < n; i++)
-          {
-            if (_circle[i].RotationOrScale >= 0)
-              frame.Add(_circle[i]);
-          }
+          // for (int i = 0; i < n; i++)
+          // {
+          //   if (_circle[i].RotationOrScale >= 0)
+          //     frame.Add(_circle[i]);
+          // }
 
           if (_custom)
             frame.Add(_customCursor);

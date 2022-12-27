@@ -82,6 +82,12 @@ namespace Lima
       entitiesPanel.AddChild(ProductionList);
     }
 
+    public void ApplySettings(FileHandler.AppContent content)
+    {
+      Charts.BatteryOutputAsProduction = content.BatteryChartEnabled;
+      Charts.ChartIntervalIndex = content.ChartIntervalIndex;
+    }
+
     public void UpdateValues()
     {
       if (_electricMan.Updatecount <= _lastUpdate)
@@ -173,7 +179,7 @@ namespace Lima
     public static string HoursFormat(float hours, string decimals = "0.##")
     {
       if (hours > 24 * 365)
-        return "1 year";
+        return "1 year +";
 
       _str.Clear();
       MyValueFormatter.AppendTimeInBestUnit(hours * 3600f, _str);

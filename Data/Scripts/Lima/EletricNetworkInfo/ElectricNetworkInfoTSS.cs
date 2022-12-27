@@ -39,7 +39,7 @@ namespace Lima
       // Surface.ScriptForegroundColor = new Color(230, 220, 210);
 
       surface.ScriptBackgroundColor = Color.Black;
-      Surface.ScriptForegroundColor = Color.RoyalBlue;
+      Surface.ScriptForegroundColor = Color.SteelBlue;
     }
 
     public void Init()
@@ -52,6 +52,8 @@ namespace Lima
       _init = true;
 
       var electricManager = GameSession.Instance.GetElectricManagerForBlock(_block);
+      if (electricManager == null)
+        return;
 
       _app = new ElectricNetworkInfoApp(electricManager);
       _app.InitApp(this.Block as MyCubeBlock, this.Surface as IMyTextSurface);
@@ -59,7 +61,37 @@ namespace Lima
       _app.InitElements();
       _app.Theme.Scale = Math.Min(Math.Max(this.Surface.SurfaceSize.Y / 256, 0.4f), 1);
 
+      GameSession.Instance.Handler.AddActiveTSS(this);
+      LoadAppContent();
+
       _terminalBlock.OnMarkForClose += BlockMarkedForClose;
+    }
+
+    public FileHandler.AppContent GenerateAppContent()
+    {
+      return new FileHandler.AppContent()
+      {
+        BlockId = _block.EntityId,
+        SurfaceName = _surface.Name,
+        ScriptBackgroundColor = _surface.ScriptBackgroundColor.PackedValue,
+        ScriptForegroundColor = _surface.ScriptForegroundColor.PackedValue,
+        BatteryChartEnabled = _app.Charts.BatteryOutputAsProduction,
+        ChartIntervalIndex = _app.Charts.ChartIntervalIndex
+      };
+    }
+
+    public void LoadAppContent()
+    {
+      var loadContent = GameSession.Instance.Handler.GetAppContent(_block.EntityId, _surface.Name);
+      if (loadContent != null)
+      {
+        var content = loadContent.GetValueOrDefault();
+
+        _surface.ScriptBackgroundColor = new Color(content.ScriptBackgroundColor);
+        _surface.ScriptForegroundColor = new Color(content.ScriptForegroundColor);
+
+        _app.ApplySettings(content);
+      }
     }
 
     public override void Dispose()
@@ -67,6 +99,7 @@ namespace Lima
       base.Dispose();
 
       GameSession.Instance.RemoveManagerFromBlock(_block);
+      GameSession.Instance.Handler.RemoveActiveTSS(this);
 
       _app?.Dispose();
       _terminalBlock.OnMarkForClose -= BlockMarkedForClose;

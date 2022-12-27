@@ -13,6 +13,7 @@ namespace Lima
     public static GameSession Instance;
 
     private List<ElectricNetworkManager> _electricManagers;
+    public FileHandler Handler = new FileHandler();
 
     public override void LoadData()
     {
@@ -26,6 +27,9 @@ namespace Lima
 
     public ElectricNetworkManager GetElectricManagerForBlock(IMyCubeBlock lcdBlock)
     {
+      if (MyAPIGateway.Utilities.IsDedicated)
+        return null;
+
       if (_electricManagers != null)
       {
         foreach (var manager in _electricManagers)
@@ -70,6 +74,11 @@ namespace Lima
       if (_electricManagers != null)
         foreach (var manager in _electricManagers)
           manager.Update();
+    }
+
+    public override void SaveData()
+    {
+      Handler.Save(_electricManagers);
     }
   }
 }

@@ -1,21 +1,13 @@
 using System;
 using VRageMath;
-using Lima.API;
-using VRage.Game.GUI.TextPanel;
 using Sandbox.Game.Entities;
-using Sandbox.Game.GameSystems.TextSurfaceScripts;
 using Sandbox.ModAPI;
 using VRage.Game;
 using VRage.Game.ModAPI;
-using VRage.ModAPI;
-using VRage.Utils;
 using System.Collections.Generic;
 using Sandbox.Game.EntityComponents;
 using VRage;
-using Sandbox.Definitions;
-using Sandbox.Game.GameSystems;
 using SpaceEngineers.Game.ModAPI;
-using System.Linq;
 
 namespace Lima
 {
@@ -51,7 +43,7 @@ namespace Lima
     public PowerStats CurrentPowerStats = new PowerStats();
     public BatteryStats CurrentBatteryStats = new BatteryStats();
 
-    public int MaxHistory = 1800; // 30 min
+    private readonly int _maxHistory = 1800; // 30 min
     public readonly List<PowerStats> PowerStatsHistory = new List<PowerStats>();
 
     private readonly List<IMyCubeGrid> _grids = new List<IMyCubeGrid>();
@@ -67,6 +59,28 @@ namespace Lima
     {
       _lcdBlocks = new List<IMyCubeBlock>() { lcdBlock };
       HandleGrid(lcdBlock.CubeGrid);
+
+      LoadAppContent();
+    }
+
+    public FileHandler.ManagerContent GenerateManagerContent()
+    {
+      return new FileHandler.ManagerContent()
+      {
+        GridId = _lcdBlocks[0].CubeGrid.EntityId,
+        PowerStatsHistory = PowerStatsHistory
+      };
+    }
+
+    public void LoadAppContent()
+    {
+      var loadContent = GameSession.Instance.Handler.GetManagerContent(_lcdBlocks[0].CubeGrid.EntityId);
+      if (loadContent != null)
+      {
+        var content = loadContent.GetValueOrDefault();
+
+        PowerStatsHistory.AddRange(content.PowerStatsHistory);
+      }
     }
 
     public void Dispose()
@@ -223,10 +237,10 @@ namespace Lima
 
       Updatecount++;
 
-      UpdateDistributiorStatus();
-
       CurrentPowerStats = new PowerStats();
       CurrentBatteryStats = new BatteryStats();
+
+      UpdateDistributiorStatus();
 
       ProductionBlocks.Clear();
       ConsumptionBlocks.Clear();
@@ -306,7 +320,7 @@ namespace Lima
 
     private void TrimHistoryLimit()
     {
-      while (PowerStatsHistory.Count > MaxHistory)
+      while (PowerStatsHistory.Count > _maxHistory)
         PowerStatsHistory.RemoveAt(0);
     }
   }

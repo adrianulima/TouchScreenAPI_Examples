@@ -19,8 +19,33 @@ namespace Lima
     private List<float[]> _dataSets;
     private LegendItem[] _legends;
     private FancyLabel[] _labels;
+    private FancySwitch _intervalSwitcher;
+    private FancyCheckbox _batteryCheckbox;
 
-    public bool BatteryOutputAsProduction = false;
+    private bool _batteryOutputAsProduction = true;
+    public bool BatteryOutputAsProduction
+    {
+      get { return _batteryOutputAsProduction; }
+      set
+      {
+        _batteryOutputAsProduction = value;
+        _batteryCheckbox.Value = _batteryOutputAsProduction;
+      }
+    }
+
+    private int _chartIntervalIndex = 0;
+    public int ChartIntervalIndex
+    {
+      get { return _chartIntervalIndex; }
+      set
+      {
+        if (_chartIntervalIndex == value)
+          return;
+        _chartIntervalIndex = value;
+        _intervalSwitcher.Index = _chartIntervalIndex;
+        UpdateSkip();
+      }
+    }
 
     public ChartView() : base(ViewDirection.Column)
     {
@@ -63,32 +88,12 @@ namespace Lima
 
     private void CreateElements()
     {
-      var intervalSwitcher = new FancySwitch(new string[] { "30s", "1m", "5m", "10m", "30m" }, 0, (int v) =>
+      _intervalSwitcher = new FancySwitch(new string[] { "30s", "1m", "5m", "10m", "30m" }, _chartIntervalIndex, (int v) =>
       {
-        switch (v)
-        {
-          case 0:
-            _skip = 1;
-            break;
-          case 1:
-            _skip = 2; // 60 / 30;
-            break;
-          case 2:
-            _skip = 10; // (5 * 60) / 30;
-            break;
-          case 3:
-            _skip = 20; // (10 * 60) / 30;
-            break;
-          case 4:
-            _skip = 60; // (30 * 60) / 30;
-            break;
-          default:
-            _skip = 1;
-            break;
-        }
-        UpdateChartDataSets();
+        _chartIntervalIndex = v;
+        UpdateSkip();
       });
-      AddChild(intervalSwitcher);
+      AddChild(_intervalSwitcher);
 
       _chartView = new FancyView(ViewDirection.Row);
       _chartView.Padding = new Vector4(4);
@@ -169,13 +174,39 @@ namespace Lima
       checkboxLabel.Margin = new Vector4(0, 2, 4, 0);
       checkboxLabel.Scale = new Vector2(0.5f, 0);
       _legendsView.AddChild(checkboxLabel);
-      var checkbox = new FancyCheckbox((bool v) =>
+      _batteryCheckbox = new FancyCheckbox((bool v) =>
       {
         BatteryOutputAsProduction = v;
         UpdateChartDataSets();
       }, BatteryOutputAsProduction);
-      checkbox.Pixels = new Vector2(16);
-      _legendsView.AddChild(checkbox);
+      _batteryCheckbox.Pixels = new Vector2(16);
+      _legendsView.AddChild(_batteryCheckbox);
+    }
+
+    private void UpdateSkip()
+    {
+      switch (_chartIntervalIndex)
+      {
+        case 0:
+          _skip = 1;
+          break;
+        case 1:
+          _skip = 2; // 60 / 30;
+          break;
+        case 2:
+          _skip = 10; // (5 * 60) / 30;
+          break;
+        case 3:
+          _skip = 20; // (10 * 60) / 30;
+          break;
+        case 4:
+          _skip = 60; // (30 * 60) / 30;
+          break;
+        default:
+          _skip = 1;
+          break;
+      }
+      UpdateChartDataSets();
     }
 
     public void UpdateValues(List<ElectricNetworkManager.PowerStats> history)

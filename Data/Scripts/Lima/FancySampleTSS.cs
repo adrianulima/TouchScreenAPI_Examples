@@ -31,7 +31,7 @@ namespace Lima
       _terminalBlock = (IMyTerminalBlock)block;
 
       surface.ScriptBackgroundColor = Color.Black;
-      Surface.ScriptForegroundColor = Color.RoyalBlue;
+      Surface.ScriptForegroundColor = Color.SteelBlue;
     }
 
     public void Init()

@@ -62,6 +62,8 @@ namespace Lima
 
     public void FillLastView()
     {
+      if (_views.Count == 0) return;
+
       var view = _views.Last<FancyView>();
       var childCount = view.Children.Count;
       if (childCount < _cols)
