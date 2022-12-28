@@ -132,7 +132,7 @@ namespace Lima
       _labelsWrapper.AddChild(_labels[4]);
 
       var chartWrapper = new FancyView(ViewDirection.Row);
-      chartWrapper.Margin = new Vector4(4, 8, 0, 8);
+      chartWrapper.Padding = new Vector4(4, 4, 0, 4);
       _chartView.AddChild(chartWrapper);
 
       var intervals = 30;
@@ -166,7 +166,7 @@ namespace Lima
       _legends[2] = new LegendItem("Production", Color.DarkGreen);
       _legends[2].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[2]);
-      _legends[3] = new LegendItem("Max Prod.", Color.DarkSlateGray);
+      _legends[3] = new LegendItem("Capacity", Color.DarkSlateGray);
       _legends[3].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[3]);
 

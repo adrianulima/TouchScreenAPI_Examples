@@ -71,12 +71,12 @@ namespace Lima
 
       var bgColor = Theme.GetMainColorDarker(1);
 
-      ConsumptionList = new EntityListView("INPUT", 3);
+      ConsumptionList = new EntityListView("CONSUMERS", 3);
       ConsumptionList.SetScrollViewBgColor(bgColor);
       ConsumptionList.Scale = new Vector2(3, 1);
       entitiesPanel.AddChild(ConsumptionList);
 
-      ProductionList = new EntityListView("OUTPUT", 1);
+      ProductionList = new EntityListView("PRODUCERS", 1);
       ProductionList.SetScrollViewBgColor(bgColor);
       ProductionList.Scale = new Vector2(1, 1);
       entitiesPanel.AddChild(ProductionList);
@@ -84,6 +84,7 @@ namespace Lima
 
     public void ApplySettings(FileHandler.AppContent content)
     {
+      Charts.UpdateValues(_electricMan.PowerStatsHistory);
       Charts.BatteryOutputAsProduction = content.BatteryChartEnabled;
       Charts.ChartIntervalIndex = content.ChartIntervalIndex;
     }
