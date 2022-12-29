@@ -36,8 +36,8 @@ namespace Lima
         Position = Position
       };
 
-      Sprites.Clear();
-      Sprites.Add(imageSprite);
+      GetSprites().Clear();
+      GetSprites().Add(imageSprite);
     }
   }
 }

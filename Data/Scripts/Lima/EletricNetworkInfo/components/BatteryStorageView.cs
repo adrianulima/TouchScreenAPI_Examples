@@ -70,10 +70,11 @@ namespace Lima
 
     private void CreateElements()
     {
-      _progressBar = new FancyProgressBar(0, MaxValue, false, true);
+      _progressBar = new FancyProgressBar(0, MaxValue, true);
       _progressBar.Pixels = new Vector2(_width, 0);
-      _progressBar.LabelScale = 0.6f;
-      _progressBar.LabelAlignment = TextAlignment.CENTER;
+      _progressBar.Scale = new Vector2(0, 1);
+      _progressBar.Label.FontSize = 0.6f;
+      _progressBar.Label.Alignment = TextAlignment.CENTER;
       AddChild(_progressBar);
 
       _icon = new Icon("IconEnergy", new Vector2(_width));
@@ -114,9 +115,9 @@ namespace Lima
     public void UpdateValues()
     {
       var percentage = (Value / MaxValue);
-      _progressBar.Label = $"{(float.IsNaN(percentage) ? 0f : (percentage * 100)).ToString("0")}%";
-      _progressBar.Value = Value;
+      _progressBar.Label.Text = $"{(float.IsNaN(percentage) ? 0f : (percentage * 100)).ToString("0")}%";
       _progressBar.MaxValue = MaxValue;
+      _progressBar.Value = Value;
 
       _timeLeftLabel.Text = ElectricNetworkInfoApp.HoursFormat(HoursLeft);
     }

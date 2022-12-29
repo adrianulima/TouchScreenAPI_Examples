@@ -58,7 +58,6 @@ namespace Lima
       _app = new ElectricNetworkInfoApp(electricManager);
       _app.InitApp(this.Block as MyCubeBlock, this.Surface as IMyTextSurface);
       _app.CreateElements();
-      _app.InitElements();
       _app.Theme.Scale = Math.Min(Math.Max(this.Surface.SurfaceSize.Y / 256, 0.4f), 1);
 
       GameSession.Instance.Handler.AddActiveTSS(this);
@@ -128,7 +127,8 @@ namespace Lima
         using (var frame = m_surface.DrawFrame())
         {
           _app.UpdateValues();
-          frame.AddRange(_app.Sprites);
+          _app.ForceUpdate();
+          frame.AddRange(_app.GetSprites());
           frame.Dispose();
         }
       }

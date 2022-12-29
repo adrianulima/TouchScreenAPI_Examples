@@ -17,6 +17,9 @@ namespace Lima
     {
       var window = new FancyView(FancyView.ViewDirection.Row);
       var windowBar = new FancyWindowBar("Sample App");
+      // var windowBar = new FancyView(FancyView.ViewDirection.Row);
+      windowBar.BgColor = Color.Blue;
+      windowBar.Label.TextColor = Color.Red;
 
       // window.Border=new Vector4(4);
       // window.Padding=new Vector4(14);
@@ -24,7 +27,7 @@ namespace Lima
       var col1 = new FancyScrollView();
       col1.Scale = new Vector2(1, 0.75f);
 
-      col1.Margin = new Vector4(4);
+      col1.Margin = new Vector4(24);
       col1.Border = new Vector4(4);
       col1.BorderColor = Color.Red;
       col1.Padding = new Vector4(4);
@@ -59,10 +62,10 @@ namespace Lima
       var labelProgressBar = new FancyLabel("Progress Bar");
       labelProgressBar.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.LEFT;
       labelProgressBar.Margin = Vector4.UnitY * 8;
-      var progressBar = new FancyProgressBar(0, 100);
+      var progressBar = new FancyProgressBar(0, 100, false, 2);
       progressBar.Value = 50;
-      progressBar.Label = "50%";
-      progressBar.LabelAlignment = VRage.Game.GUI.TextPanel.TextAlignment.RIGHT;
+      progressBar.Label.Text = "50%";
+      progressBar.Label.Alignment = VRage.Game.GUI.TextPanel.TextAlignment.RIGHT;
 
       var labelSelector = new FancyLabel("Color");
       labelSelector.Margin = Vector4.UnitY * 8;
@@ -106,9 +109,12 @@ namespace Lima
       });
 
       var checkboxView = new FancyView(ViewDirection.Row);
-      checkboxView.Padding = new Vector4(4);
+      checkboxView.Alignment = ViewAlignment.Center;
+      checkboxView.Scale = new Vector2(1, 0);
+      checkboxView.Pixels = new Vector2(0, 24);
+      // checkboxView.Margin = new Vector4(4);
+      checkboxView.Gap = 4;
       var checkboxLabel = new FancyLabel("Checkbox", 0.5f, TextAlignment.RIGHT);
-      checkboxLabel.Margin = new Vector4(4);
       var checkbox = new FancyCheckbox((bool v) =>
       {
         Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{v}", "SampleApp");
