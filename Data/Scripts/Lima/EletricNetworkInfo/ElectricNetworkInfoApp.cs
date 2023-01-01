@@ -38,7 +38,7 @@ namespace Lima
       AddChild(windowBarsAndChard);
 
       // Bars
-      var barsPanel = new FancyView(FancyView.ViewDirection.Row);
+      var barsPanel = new FancyView(ViewDirection.Row);
       barsPanel.Pixels = new Vector2(0, 32 * 0.4f + 24);
       barsPanel.Scale = new Vector2(1, 0);
       barsPanel.Gap = 4;
@@ -51,7 +51,7 @@ namespace Lima
       BatteryOutputStatus = new StatusView("BATTERY OUTPUT");
       barsPanel.AddChild(BatteryOutputStatus);
 
-      var batteryAndChartPanel = new FancyView(FancyView.ViewDirection.Row);
+      var batteryAndChartPanel = new FancyView(ViewDirection.Row);
       batteryAndChartPanel.Gap = 4;
       windowBarsAndChard.AddChild(batteryAndChartPanel);
 
@@ -64,7 +64,7 @@ namespace Lima
       batteryAndChartPanel.AddChild(BatteryStorageView);
 
       // Entities Panel
-      var entitiesPanel = new FancyView(FancyView.ViewDirection.Row);
+      var entitiesPanel = new FancyView(ViewDirection.Row);
       entitiesPanel.Padding = new Vector4(4);
       entitiesPanel.Gap = 4;
       AddChild(entitiesPanel);
@@ -130,8 +130,8 @@ namespace Lima
         entity.Count = (int)item.Value.X;
         entity.Value = item.Value.Y;
         entity.MaxValue = _electricMan.CurrentPowerStats.Production + _electricMan.CurrentPowerStats.BatteryOutput;
-        entity.UpdateValues();
         ProductionList.AddItem(entity);
+        entity.UpdateValues();
       }
       ProductionList.FillLastView();
 
@@ -146,8 +146,8 @@ namespace Lima
         entity.Count = (int)item.Value.X;
         entity.Value = item.Value.Y;
         entity.MaxValue = _electricMan.CurrentPowerStats.Consumption;
-        entity.UpdateValues();
         ConsumptionList.AddItem(entity);
+        entity.UpdateValues();
       }
       ConsumptionList.FillLastView();
     }

@@ -14,7 +14,7 @@ namespace Lima
     private FancyLabel _titleLabel;
     private FancyProgressBar _progressBar;
 
-    public StatusView(string title, float maxValue = 100, float value = 0) : base(FancyView.ViewDirection.Column)
+    public StatusView(string title, float maxValue = 100, float value = 0) : base(ViewDirection.Column)
     {
       Title = title;
       Value = value;

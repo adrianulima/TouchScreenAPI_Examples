@@ -50,6 +50,8 @@ namespace Lima
       _titleView.AddChild(_titleLabel);
 
       _countLabel = new FancyLabel("0", 0.4f, TextAlignment.RIGHT);
+      _countLabel.Scale = new Vector2(0, 1);
+      _countLabel.Pixels = new Vector2(10, 0);
       _titleView.AddChild(_countLabel);
 
       _progressBar = new FancyProgressBar(0, MaxValue);
@@ -62,10 +64,17 @@ namespace Lima
     public void UpdateValues()
     {
       _titleLabel.Text = Title;
-      _countLabel.Text = Count.ToString();
+
+      var countText = Count.ToString();
+
+      if (_countLabel.Text != countText)
+      {
+        _countLabel.Text = countText;
+        var px = App?.Theme.MeasureStringInPixels(countText, App.Theme.Font, 0.4f).X;
+        _countLabel.Pixels = new Vector2(px ?? 0, 0);
+      }
 
       var sv = ElectricNetworkInfoApp.PowerFormat(Value);
-
       _progressBar.Label.Text = sv;
       _progressBar.MaxValue = MaxValue;
       _progressBar.Value = Value;

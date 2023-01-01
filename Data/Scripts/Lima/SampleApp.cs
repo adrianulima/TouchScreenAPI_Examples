@@ -15,7 +15,7 @@ namespace Lima
 
     public void CreateElements()
     {
-      var window = new FancyView(FancyView.ViewDirection.Row);
+      var window = new FancyView(ViewDirection.Row);
       var windowBar = new FancyWindowBar("Sample App");
       // var windowBar = new FancyView(FancyView.ViewDirection.Row);
       windowBar.BgColor = Color.Blue;
@@ -39,9 +39,10 @@ namespace Lima
 
       var header1 = new FancyLabel("Column 1\nMultiline Test", 0.6f);
 
-      var separator1 = new FancySeparator();
-
-      var tabs = new FancySwitch(new string[] { "Tab 1", "Tab 2", "Tab 3", "Tab 4" });
+      var tabs = new FancySwitch(new string[] { "Tab 1", "Tab 2", "Tab 3", "Tab 4" }, 0, (int v) =>
+      {
+        // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{v}", "SampleApp");
+      });
 
       var labelSlider = new FancyLabel("A Fancy Slider");
       labelSlider.Margin = Vector4.UnitY * 8;
@@ -100,12 +101,14 @@ namespace Lima
 
       button.Pixels = new Vector2(0, 42);
       button.Margin = Vector4.UnitY * 22;
+      button.Border = Vector4.UnitW * 12;
 
       var labelTextField = new FancyLabel("Text Field");
       labelTextField.Margin = Vector4.UnitY * 8;
-      var textField = new FancyTextField("", (string text) =>
+      var textField = new FancyTextField("", (string text, bool wasCanceled) =>
       {
-        Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage(text, "SampleApp");
+        if (!wasCanceled)
+          Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage(text, "SampleApp");
       });
 
       var checkboxView = new FancyView(ViewDirection.Row);
@@ -124,7 +127,6 @@ namespace Lima
 
 
       col1.AddChild(header1);
-      col1.AddChild(separator1);
       col1.AddChild(labelSlider);
       col1.AddChild(slider);
       col1.AddChild(labelSliderRange);

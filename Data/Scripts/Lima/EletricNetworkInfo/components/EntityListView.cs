@@ -16,7 +16,7 @@ namespace Lima
     public string Title;
     private int _cols;
 
-    public EntityListView(string title, int cols = 2) : base(FancyView.ViewDirection.Column)
+    public EntityListView(string title, int cols = 2) : base(ViewDirection.Column)
     {
       Title = title;
       _cols = cols;
@@ -35,7 +35,7 @@ namespace Lima
       titleLabel.Alignment = TextAlignment.CENTER;
       AddChild(titleLabel);
 
-      _scrollView = new FancyScrollView(FancyView.ViewDirection.Column);
+      _scrollView = new FancyScrollView(ViewDirection.Column);
       _scrollView.Padding = new Vector4(2, 2, 2, 0);
       _scrollView.Gap = 2;
       AddChild(_scrollView);

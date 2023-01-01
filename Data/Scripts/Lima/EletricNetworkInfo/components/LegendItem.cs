@@ -15,7 +15,7 @@ namespace Lima
     private FancyLabel _titleLabel;
     private FancyView _square;
 
-    public LegendItem(string title, Color color, float value = 0) : base(FancyView.ViewDirection.Row)
+    public LegendItem(string title, Color color, float value = 0) : base(ViewDirection.Row)
     {
       Title = title;
       Value = value;

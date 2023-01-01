@@ -28,7 +28,7 @@ namespace Lima
 
     private int _width = 48;
 
-    public BatteryStorageView(float maxValue = 100, float value = 0) : base(FancyView.ViewDirection.Column)
+    public BatteryStorageView(float maxValue = 100, float value = 0) : base(ViewDirection.Column)
     {
       Value = value;
       MaxValue = maxValue;
