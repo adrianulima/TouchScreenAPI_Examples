@@ -38,8 +38,8 @@ namespace Lima
       // surface.ScriptBackgroundColor = new Color(140, 120, 95);
       // Surface.ScriptForegroundColor = new Color(230, 220, 210);
 
-      surface.ScriptBackgroundColor = Color.Black;
-      Surface.ScriptForegroundColor = Color.SteelBlue;
+      // surface.ScriptBackgroundColor = Color.Black;
+      // Surface.ScriptForegroundColor = Color.SteelBlue;
     }
 
     public void Init()
@@ -62,6 +62,7 @@ namespace Lima
 
       GameSession.Instance.Handler.AddActiveTSS(this);
       LoadAppContent();
+      _app.UpdateValues();
 
       _terminalBlock.OnMarkForClose += BlockMarkedForClose;
     }
@@ -72,10 +73,9 @@ namespace Lima
       {
         BlockId = _block.EntityId,
         SurfaceName = _surface.Name,
-        ScriptBackgroundColor = _surface.ScriptBackgroundColor.PackedValue,
-        ScriptForegroundColor = _surface.ScriptForegroundColor.PackedValue,
-        BatteryChartEnabled = _app.Charts.BatteryOutputAsProduction,
-        ChartIntervalIndex = _app.Charts.ChartIntervalIndex
+        Layout = _app.WindowBarButtons.CurrentLayout,
+        ChartIntervalIndex = _app.OverviewPanel.ChartPanel.ChartIntervalIndex,
+        BatteryChartEnabled = _app.OverviewPanel.ChartPanel.BatteryOutputAsProduction
       };
     }
 
@@ -85,9 +85,6 @@ namespace Lima
       if (loadContent != null)
       {
         var content = loadContent.GetValueOrDefault();
-
-        _surface.ScriptBackgroundColor = new Color(content.ScriptBackgroundColor);
-        _surface.ScriptForegroundColor = new Color(content.ScriptForegroundColor);
 
         _app.ApplySettings(content);
       }
@@ -126,7 +123,6 @@ namespace Lima
 
         using (var frame = m_surface.DrawFrame())
         {
-          _app.UpdateValues();
           _app.ForceUpdate();
           frame.AddRange(_app.GetSprites());
           frame.Dispose();

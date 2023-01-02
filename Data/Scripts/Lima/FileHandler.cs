@@ -132,11 +132,10 @@ namespace Lima
     {
       public long BlockId;
       public string SurfaceName;
-      public uint ScriptForegroundColor;
-      public uint ScriptBackgroundColor;
 
-      public bool BatteryChartEnabled;
+      public int Layout;
       public int ChartIntervalIndex;
+      public bool BatteryChartEnabled;
     }
 
     public struct ManagerContent

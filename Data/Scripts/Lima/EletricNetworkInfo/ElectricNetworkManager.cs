@@ -38,7 +38,7 @@ namespace Lima
 
     public const int TicksPerSecond = (int)((MyEngineConstants.UPDATE_STEPS_PER_MINUTE / 60));
     private int _tick = TicksPerSecond - 1;
-    public int Updatecount = 0;
+    public event Action UpdateEvent;
 
     public PowerStats CurrentPowerStats = new PowerStats();
     public BatteryStats CurrentBatteryStats = new BatteryStats();
@@ -88,11 +88,11 @@ namespace Lima
       Clear();
       PowerStatsHistory.Clear();
       _lcdBlocks.Clear();
+      UpdateEvent = null;
     }
 
     public void Clear()
     {
-      Updatecount = 0;
       _grids.Clear();
       _inputList.Clear();
       _outputList.Clear();
@@ -235,8 +235,6 @@ namespace Lima
         return;
       _tick = 0;
 
-      Updatecount++;
-
       CurrentPowerStats = new PowerStats();
       CurrentBatteryStats = new BatteryStats();
 
@@ -315,7 +313,7 @@ namespace Lima
 
       PowerStatsHistory.Add(CurrentPowerStats);
 
-      // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{CurrentPowerStats.Production}", "Electric");
+      UpdateEvent?.Invoke();
     }
 
     private void TrimHistoryLimit()

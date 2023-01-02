@@ -17,21 +17,11 @@ namespace Lima
     private FancyLabel _countLabel;
     private FancyProgressBar _progressBar;
 
-    public EntityItem(string title) : base(ViewDirection.Column)
+    public EntityItem(string title, Color TextColor) : base(ViewDirection.Column)
     {
       Title = title;
       SetStyles();
-      CreateElements();
-
-      RegisterUpdate(Update);
-    }
-
-    private void Update()
-    {
-      BgColor = App.Theme.GetMainColorDarker(4);
-
-      _titleLabel.TextColor = App.Theme.MainColor;
-      _countLabel.TextColor = App.Theme.MainColor;
+      CreateElements(TextColor);
     }
 
     private void SetStyles()
@@ -39,7 +29,7 @@ namespace Lima
       Padding = new Vector4(2);
     }
 
-    private void CreateElements()
+    private void CreateElements(Color TextColor)
     {
       _titleView = new FancyView(ViewDirection.Row);
       _titleView.Scale = new Vector2(1, 0);
@@ -47,9 +37,11 @@ namespace Lima
       AddChild(_titleView);
 
       _titleLabel = new FancyLabel(Title, 0.4f, TextAlignment.LEFT);
+      _titleLabel.TextColor = TextColor;
       _titleView.AddChild(_titleLabel);
 
       _countLabel = new FancyLabel("0", 0.4f, TextAlignment.RIGHT);
+      _countLabel.TextColor = TextColor;
       _countLabel.Scale = new Vector2(0, 1);
       _countLabel.Pixels = new Vector2(10, 0);
       _titleView.AddChild(_countLabel);

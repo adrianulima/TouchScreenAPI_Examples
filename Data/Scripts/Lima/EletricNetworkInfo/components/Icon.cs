@@ -11,7 +11,7 @@ namespace Lima
     public float SpriteRotation;
     public Color? SpriteColor;
 
-    public Icon(string image, Vector2 size, float rotation = 0, Color? color = null) : base()
+    public Icon(string image, Vector2 size, float rotation = 0, Color? color = null)
     {
       SpriteImage = image;
       SpriteSize = size;

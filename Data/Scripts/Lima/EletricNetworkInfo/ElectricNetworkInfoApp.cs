@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using VRageMath;
 using Lima.API;
-using System.Linq;
-using VRage;
 using VRage.Utils;
 using System.Text;
 
@@ -12,151 +7,88 @@ namespace Lima
   public class ElectricNetworkInfoApp : FancyApp
   {
     private ElectricNetworkManager _electricMan;
-    private int _lastUpdate = -1;
+    public OverviewPanel OverviewPanel;
+    public EntitiesPanel EntitiesPanel;
+    public WindowButtons WindowBarButtons;
+
+    public FancyView MainView;
 
     public ElectricNetworkInfoApp(ElectricNetworkManager electricManager)
     {
       _electricMan = electricManager;
+      _electricMan.UpdateEvent += UpdateValues;
     }
-
-    public StatusView ConsumptionStatus { get; private set; }
-    public StatusView ProductionStatus { get; private set; }
-    public StatusView BatteryOutputStatus { get; private set; }
-    public BatteryStorageView BatteryStorageView { get; private set; }
-    public EntityListView ProductionList { get; private set; }
-    public EntityListView ConsumptionList { get; private set; }
-    public ChartView Charts { get; private set; }
 
     public void CreateElements()
     {
       var windowBar = new FancyWindowBar("Electric Network Info");
       AddChild(windowBar);
 
-      var windowBarsAndChard = new FancyView();
-      windowBarsAndChard.Padding = new Vector4(4);
-      windowBarsAndChard.Gap = 4;
-      AddChild(windowBarsAndChard);
+      WindowBarButtons = new WindowButtons(OnChangeLayout);
+      windowBar.AddChild(WindowBarButtons);
 
-      // Bars
-      var barsPanel = new FancyView(ViewDirection.Row);
-      barsPanel.Pixels = new Vector2(0, 32 * 0.4f + 24);
-      barsPanel.Scale = new Vector2(1, 0);
-      barsPanel.Gap = 4;
-      windowBarsAndChard.AddChild(barsPanel);
+      MainView = new FancyView();
+      AddChild(MainView);
 
-      ConsumptionStatus = new StatusView("CONSUMPTION");
-      barsPanel.AddChild(ConsumptionStatus);
-      ProductionStatus = new StatusView("PRODUCTION");
-      barsPanel.AddChild(ProductionStatus);
-      BatteryOutputStatus = new StatusView("BATTERY OUTPUT");
-      barsPanel.AddChild(BatteryOutputStatus);
+      OverviewPanel = new OverviewPanel();
+      MainView.AddChild(OverviewPanel);
+      OverviewPanel.CreateElements();
 
-      var batteryAndChartPanel = new FancyView(ViewDirection.Row);
-      batteryAndChartPanel.Gap = 4;
-      windowBarsAndChard.AddChild(batteryAndChartPanel);
+      EntitiesPanel = new EntitiesPanel();
+      MainView.AddChild(EntitiesPanel);
+      EntitiesPanel.CreateElements();
+    }
 
-      // Chart Panel
-      Charts = new ChartView();
-      batteryAndChartPanel.AddChild(Charts);
-
-      // Battery Storage bar
-      BatteryStorageView = new BatteryStorageView();
-      batteryAndChartPanel.AddChild(BatteryStorageView);
-
-      // Entities Panel
-      var entitiesPanel = new FancyView(ViewDirection.Row);
-      entitiesPanel.Padding = new Vector4(4);
-      entitiesPanel.Gap = 4;
-      AddChild(entitiesPanel);
-
-      var bgColor = Theme.GetMainColorDarker(1);
-
-      ConsumptionList = new EntityListView("CONSUMERS", 3);
-      ConsumptionList.SetScrollViewBgColor(bgColor);
-      ConsumptionList.Scale = new Vector2(3, 1);
-      entitiesPanel.AddChild(ConsumptionList);
-
-      ProductionList = new EntityListView("PRODUCERS", 1);
-      ProductionList.SetScrollViewBgColor(bgColor);
-      ProductionList.Scale = new Vector2(1, 1);
-      entitiesPanel.AddChild(ProductionList);
+    public void OnChangeLayout()
+    {
+      switch (WindowBarButtons.CurrentLayout)
+      {
+        default:
+        case 0:
+          MainView.Direction = ViewDirection.Column;
+          OverviewPanel.Enabled = true;
+          EntitiesPanel.Enabled = true;
+          break;
+        case 1:
+          MainView.Direction = ViewDirection.Row;
+          OverviewPanel.Enabled = true;
+          EntitiesPanel.Enabled = true;
+          break;
+        case 2:
+          MainView.Direction = ViewDirection.Column;
+          OverviewPanel.Enabled = true;
+          EntitiesPanel.Enabled = false;
+          break;
+        case 3:
+          MainView.Direction = ViewDirection.Column;
+          OverviewPanel.Enabled = false;
+          EntitiesPanel.Enabled = true;
+          break;
+      }
     }
 
     public void ApplySettings(FileHandler.AppContent content)
     {
-      Charts.UpdateValues(_electricMan.PowerStatsHistory);
-      Charts.BatteryOutputAsProduction = content.BatteryChartEnabled;
-      Charts.ChartIntervalIndex = content.ChartIntervalIndex;
+      WindowBarButtons.CurrentLayout = content.Layout;
+      OverviewPanel.ApplySettings(content, _electricMan);
+
+      OnChangeLayout();
     }
 
     public void UpdateValues()
     {
-      if (_electricMan.Updatecount <= _lastUpdate)
-        return;
-      _lastUpdate = _electricMan.Updatecount;
+      if (OverviewPanel.Enabled)
+        OverviewPanel.UpdateValues(_electricMan);
 
-      ConsumptionStatus.Value = _electricMan.CurrentPowerStats.Consumption;
-      ConsumptionStatus.MaxValue = _electricMan.CurrentPowerStats.MaxConsumption;
-      ProductionStatus.Value = _electricMan.CurrentPowerStats.Production;
-      ProductionStatus.MaxValue = _electricMan.CurrentPowerStats.MaxProduction;
-      BatteryOutputStatus.Value = _electricMan.CurrentPowerStats.BatteryOutput;
-      BatteryOutputStatus.MaxValue = _electricMan.CurrentPowerStats.BatteryMaxOutput;
-      BatteryStorageView.Value = _electricMan.CurrentBatteryStats.BatteryCharge;
-      BatteryStorageView.MaxValue = _electricMan.CurrentBatteryStats.BatteryMaxCharge;
-      BatteryStorageView.HoursLeft = _electricMan.CurrentBatteryStats.BatteryHoursLeft;
-      BatteryStorageView.UpdateOverloadStatus(_electricMan.CurrentBatteryStats.EnergyState == MyResourceStateEnum.OverloadBlackout);
-
-      var inputRatio = _electricMan.CurrentBatteryStats.BatteryInput / _electricMan.CurrentBatteryStats.BatteryMaxInput;
-      BatteryStorageView.InputRatio = float.IsNaN(inputRatio) ? 0f : inputRatio;
-      var outputRatio = _electricMan.CurrentPowerStats.BatteryOutput / _electricMan.CurrentPowerStats.BatteryMaxOutput;
-      BatteryStorageView.OutputRatio = float.IsNaN(outputRatio) ? 0f : outputRatio;
-
-      ConsumptionStatus.UpdateValues();
-      ProductionStatus.UpdateValues();
-      BatteryOutputStatus.UpdateValues();
-      BatteryStorageView.UpdateValues();
-      Charts.UpdateValues(_electricMan.PowerStatsHistory);
-
-      var bgColor = Theme.GetMainColorDarker(1);
-
-      ProductionList.SetScrollViewBgColor(bgColor);
-      ProductionList.RemoveAllChildren();
-
-      var productionList = _electricMan.ProductionBlocks.ToList();
-      productionList.Sort((pair1, pair2) => pair2.Value.Y.CompareTo(pair1.Value.Y));
-      foreach (var item in productionList)
-      {
-        var entity = new EntityItem(item.Key);
-        entity.Count = (int)item.Value.X;
-        entity.Value = item.Value.Y;
-        entity.MaxValue = _electricMan.CurrentPowerStats.Production + _electricMan.CurrentPowerStats.BatteryOutput;
-        ProductionList.AddItem(entity);
-        entity.UpdateValues();
-      }
-      ProductionList.FillLastView();
-
-      ConsumptionList.SetScrollViewBgColor(bgColor);
-      ConsumptionList.RemoveAllChildren();
-
-      var consumptionList = _electricMan.ConsumptionBlocks.ToList();
-      consumptionList.Sort((pair1, pair2) => pair2.Value.Y.CompareTo(pair1.Value.Y));
-      foreach (var item in consumptionList)
-      {
-        var entity = new EntityItem(item.Key);
-        entity.Count = (int)item.Value.X;
-        entity.Value = item.Value.Y;
-        entity.MaxValue = _electricMan.CurrentPowerStats.Consumption;
-        ConsumptionList.AddItem(entity);
-        entity.UpdateValues();
-      }
-      ConsumptionList.FillLastView();
+      if (EntitiesPanel.Enabled)
+        EntitiesPanel.UpdateValues(_electricMan);
     }
 
     public void Dispose()
     {
       ForceDispose();
-      ProductionList.Dispose();
-      ConsumptionList.Dispose();
+      OverviewPanel.Dispose();
+      EntitiesPanel.Dispose();
     }
 
     public static string PowerFormat(float MW, string decimals = "0.##")

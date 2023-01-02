@@ -101,7 +101,7 @@ namespace Lima
 
       _labelsWrapper = new FancyView(ViewDirection.Column);
       _labelsWrapper.Scale = new Vector2(0, 1);
-      _labelsWrapper.Pixels = new Vector2(50, 1);
+      _labelsWrapper.Pixels = new Vector2(50, 0);
       _chartView.AddChild(_labelsWrapper);
 
       _labels = new FancyLabel[5];
