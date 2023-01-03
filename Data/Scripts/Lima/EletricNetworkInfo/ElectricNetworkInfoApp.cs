@@ -99,9 +99,10 @@ namespace Lima
     public void Dispose()
     {
       ForceDispose();
-      OverviewPanel.Dispose();
-      EntitiesPanel.Dispose();
-      _electricMan.UpdateEvent -= UpdateValues;
+      OverviewPanel?.Dispose();
+      EntitiesPanel?.Dispose();
+      if (_electricMan != null)
+        _electricMan.UpdateEvent -= UpdateValues;
     }
 
     public static string PowerFormat(float MW, string decimals = "0.##")

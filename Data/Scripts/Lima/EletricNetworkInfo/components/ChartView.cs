@@ -148,8 +148,8 @@ namespace Lima
       _dataSets.Add(null);
       _dataSets.Add(null);
       _dataSets.Add(null);
-      _chart.DataColors.Add(Color.DarkSlateGray);
-      _chart.DataColors.Add(Color.DarkGreen);
+      _chart.DataColors.Add(Color.FloralWhite);
+      _chart.DataColors.Add(Color.DarkViolet);
       _chart.DataColors.Add(Color.SlateGray);
       _chart.DataColors.Add(Color.OrangeRed);
       _chart.GridHorizontalLines = 5;
@@ -169,10 +169,10 @@ namespace Lima
       _legends[1] = new LegendItem("Max Consum.", Color.SlateGray);
       _legends[1].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[1]);
-      _legends[2] = new LegendItem("Production", Color.DarkGreen);
+      _legends[2] = new LegendItem("Production", Color.DarkViolet);
       _legends[2].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[2]);
-      _legends[3] = new LegendItem("Capacity", Color.DarkSlateGray);
+      _legends[3] = new LegendItem("Capacity", Color.FloralWhite);
       _legends[3].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[3]);
 
