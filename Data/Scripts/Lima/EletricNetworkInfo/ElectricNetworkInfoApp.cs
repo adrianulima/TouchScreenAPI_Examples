@@ -1,22 +1,27 @@
 using Lima.API;
 using VRage.Utils;
 using System.Text;
+using System;
 
 namespace Lima
 {
   public class ElectricNetworkInfoApp : FancyApp
   {
     private ElectricNetworkManager _electricMan;
-    public OverviewPanel OverviewPanel;
-    public EntitiesPanel EntitiesPanel;
-    public WindowButtons WindowBarButtons;
 
     public FancyView MainView;
+    public WindowButtons WindowBarButtons;
+    public OverviewPanel OverviewPanel;
+    public EntitiesPanel EntitiesPanel;
 
-    public ElectricNetworkInfoApp(ElectricNetworkManager electricManager)
+    public Action SaveConfigAction;
+
+    public ElectricNetworkInfoApp(ElectricNetworkManager electricManager, Action saveConfigAction)
     {
       _electricMan = electricManager;
       _electricMan.UpdateEvent += UpdateValues;
+
+      SaveConfigAction = saveConfigAction;
     }
 
     public void CreateElements()
@@ -24,13 +29,13 @@ namespace Lima
       var windowBar = new FancyWindowBar("Electric Network Info");
       AddChild(windowBar);
 
-      WindowBarButtons = new WindowButtons(OnChangeLayout);
+      WindowBarButtons = new WindowButtons(OnChangeConfig);
       windowBar.AddChild(WindowBarButtons);
 
       MainView = new FancyView();
       AddChild(MainView);
 
-      OverviewPanel = new OverviewPanel();
+      OverviewPanel = new OverviewPanel(OnChangeConfig);
       MainView.AddChild(OverviewPanel);
       OverviewPanel.CreateElements();
 
@@ -39,7 +44,22 @@ namespace Lima
       EntitiesPanel.CreateElements();
     }
 
-    public void OnChangeLayout()
+    public void OnChangeConfig()
+    {
+      SaveConfigAction();
+      UpdateLayout();
+    }
+
+    public void ApplySettings(AppContent content)
+    {
+      WindowBarButtons.CurrentLayout = content.Layout;
+      OverviewPanel.ApplySettings(content, _electricMan);
+
+      UpdateLayout();
+      UpdateValues();
+    }
+
+    public void UpdateLayout()
     {
       switch (WindowBarButtons.CurrentLayout)
       {
@@ -67,14 +87,6 @@ namespace Lima
       }
     }
 
-    public void ApplySettings(FileHandler.AppContent content)
-    {
-      WindowBarButtons.CurrentLayout = content.Layout;
-      OverviewPanel.ApplySettings(content, _electricMan);
-
-      OnChangeLayout();
-    }
-
     public void UpdateValues()
     {
       if (OverviewPanel.Enabled)
@@ -89,6 +101,7 @@ namespace Lima
       ForceDispose();
       OverviewPanel.Dispose();
       EntitiesPanel.Dispose();
+      _electricMan.UpdateEvent -= UpdateValues;
     }
 
     public static string PowerFormat(float MW, string decimals = "0.##")

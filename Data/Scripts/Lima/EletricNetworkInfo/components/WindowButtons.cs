@@ -15,11 +15,11 @@ namespace Lima
 
     public int CurrentLayout = 0;
 
-    public Action OnChangeLayout;
+    public Action OnChangeConfig;
 
-    public WindowButtons(Action onChangeLayout)
+    public WindowButtons(Action onChangeConfig)
     {
-      OnChangeLayout = onChangeLayout;
+      OnChangeConfig = onChangeConfig;
 
       Direction = ViewDirection.RowReverse;
       Anchor = ViewAnchor.End;
@@ -66,7 +66,7 @@ namespace Lima
       if (CurrentLayout >= 4)
         CurrentLayout = 0;
 
-      OnChangeLayout();
+      OnChangeConfig();
     }
 
     private void Update()

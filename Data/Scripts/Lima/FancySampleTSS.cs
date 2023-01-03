@@ -89,6 +89,7 @@ namespace Lima
       }
       catch (Exception e)
       {
+        _app = null;
         MyLog.Default.WriteLineAndConsole($"{e.Message}\n{e.StackTrace}");
 
         if (MyAPIGateway.Session?.Player != null)

@@ -1,5 +1,6 @@
 using System;
 using Sandbox.Game.Entities;
+using Sandbox.Game.EntityComponents;
 using Sandbox.Game.GameSystems.TextSurfaceScripts;
 using Sandbox.ModAPI;
 using VRage.Game;
@@ -20,6 +21,7 @@ namespace Lima
     private IMyTextSurface _surface;
 
     private ElectricNetworkInfoApp _app;
+    private BlockStorageHandler _storageHandler;
 
     bool _init = false;
     int ticks = 0;
@@ -55,39 +57,31 @@ namespace Lima
       if (electricManager == null)
         return;
 
-      _app = new ElectricNetworkInfoApp(electricManager);
+      _storageHandler = new BlockStorageHandler();
+
+      _app = new ElectricNetworkInfoApp(electricManager, SaveConfigAction);
       _app.InitApp(this.Block as MyCubeBlock, this.Surface as IMyTextSurface);
       _app.CreateElements();
       _app.Theme.Scale = Math.Min(Math.Max(this.Surface.SurfaceSize.Y / 256, 0.4f), 1);
 
-      GameSession.Instance.Handler.AddActiveTSS(this);
-      LoadAppContent();
-      _app.UpdateValues();
+      var appContent = _storageHandler.LoadAppContent(_block, _surface.Name);
+      if (appContent != null)
+        _app.ApplySettings(appContent.GetValueOrDefault());
 
       _terminalBlock.OnMarkForClose += BlockMarkedForClose;
     }
 
-    public FileHandler.AppContent GenerateAppContent()
+    public void SaveConfigAction()
     {
-      return new FileHandler.AppContent()
+      var appContent = new AppContent()
       {
-        BlockId = _block.EntityId,
         SurfaceName = _surface.Name,
         Layout = _app.WindowBarButtons.CurrentLayout,
         ChartIntervalIndex = _app.OverviewPanel.ChartPanel.ChartIntervalIndex,
         BatteryChartEnabled = _app.OverviewPanel.ChartPanel.BatteryOutputAsProduction
       };
-    }
 
-    public void LoadAppContent()
-    {
-      var loadContent = GameSession.Instance.Handler.GetAppContent(_block.EntityId, _surface.Name);
-      if (loadContent != null)
-      {
-        var content = loadContent.GetValueOrDefault();
-
-        _app.ApplySettings(content);
-      }
+      _storageHandler.SaveAppContent(_block, appContent);
     }
 
     public override void Dispose()
@@ -95,7 +89,7 @@ namespace Lima
       base.Dispose();
 
       GameSession.Instance.RemoveManagerFromBlock(_block);
-      GameSession.Instance.Handler.RemoveActiveTSS(this);
+      // TODO: Consider clearing modstorage (_storageHandler)
 
       _app?.Dispose();
       _terminalBlock.OnMarkForClose -= BlockMarkedForClose;
@@ -130,6 +124,8 @@ namespace Lima
       }
       catch (Exception e)
       {
+        _app?.Dispose();
+        _app = null;
         MyLog.Default.WriteLineAndConsole($"{e.Message}\n{e.StackTrace}");
 
         if (MyAPIGateway.Session?.Player != null)

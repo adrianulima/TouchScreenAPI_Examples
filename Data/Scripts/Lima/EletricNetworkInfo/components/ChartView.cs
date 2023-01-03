@@ -30,6 +30,7 @@ namespace Lima
       {
         _batteryOutputAsProduction = value;
         _batteryCheckbox.Value = _batteryOutputAsProduction;
+        OnChangeConfig();
       }
     }
 
@@ -44,11 +45,16 @@ namespace Lima
         _chartIntervalIndex = value;
         _intervalSwitcher.Index = _chartIntervalIndex;
         UpdateSkip();
+        OnChangeConfig();
       }
     }
 
-    public ChartView() : base(ViewDirection.Column)
+    public Action OnChangeConfig;
+
+    public ChartView(Action onChangeConfig) : base(ViewDirection.Column)
     {
+      OnChangeConfig = onChangeConfig;
+
       CreateElements();
 
       RegisterUpdate(Update);

@@ -1,13 +1,17 @@
 using VRageMath;
 using Lima.API;
 using VRage;
+using System;
 
 namespace Lima
 {
   public class OverviewPanel : FancyView
   {
-    public OverviewPanel()
+    public Action OnChangeConfig;
+
+    public OverviewPanel(Action onChangeConfig)
     {
+      OnChangeConfig = onChangeConfig;
     }
 
     public StatusView ConsumptionStatus { get; private set; }
@@ -40,7 +44,7 @@ namespace Lima
       AddChild(batteryAndChartPanel);
 
       // Chart Panel
-      ChartPanel = new ChartView();
+      ChartPanel = new ChartView(OnChangeConfig);
       batteryAndChartPanel.AddChild(ChartPanel);
 
       // Battery Storage bar
@@ -48,7 +52,7 @@ namespace Lima
       batteryAndChartPanel.AddChild(BatteryStorageView);
     }
 
-    public void ApplySettings(FileHandler.AppContent content, ElectricNetworkManager electricMan)
+    public void ApplySettings(AppContent content, ElectricNetworkManager electricMan)
     {
       ChartPanel.UpdateValues(electricMan.PowerStatsHistory);
       ChartPanel.BatteryOutputAsProduction = content.BatteryChartEnabled;

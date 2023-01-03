@@ -9,7 +9,6 @@ namespace Lima
   public class FileHandler
   {
     public readonly string FileName = "ElectricInfo.cfg";
-    private readonly List<ElectricNetworkInfoTSS> _activeTSSs = new List<ElectricNetworkInfoTSS>();
 
     private FileContent _currentFileContent;
     public FileContent CurrentFileContent
@@ -25,30 +24,6 @@ namespace Lima
 
     public FileHandler()
     {
-    }
-
-    public void AddActiveTSS(ElectricNetworkInfoTSS tss)
-    {
-      _activeTSSs.Add(tss);
-    }
-
-    public void RemoveActiveTSS(ElectricNetworkInfoTSS tss)
-    {
-      _activeTSSs.Remove(tss);
-    }
-
-    public AppContent? GetAppContent(long blockId, string surfaceName)
-    {
-      if (CurrentFileContent == null)
-        return null;
-
-      foreach (var app in CurrentFileContent.Apps)
-      {
-        if (app.BlockId == blockId && app.SurfaceName == surfaceName)
-          return app;
-      }
-
-      return null;
     }
 
     public ManagerContent? GetManagerContent(long gridId)
@@ -70,8 +45,8 @@ namespace Lima
       TextWriter writer = null;
       try
       {
-        string stringXML = MyAPIGateway.Utilities.SerializeToXML(new FileContent(_activeTSSs, managers));
-        writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(FileName, typeof(FileHandler));
+        string stringXML = MyAPIGateway.Utilities.SerializeToXML(new FileContent(managers));
+        writer = MyAPIGateway.Utilities.WriteFileInWorldStorage(FileName, typeof(FileHandler));
         writer.Write(stringXML);
         writer.Flush();
       }
@@ -88,14 +63,14 @@ namespace Lima
 
     public FileContent Load()
     {
-      if (!MyAPIGateway.Utilities.FileExistsInLocalStorage(FileName, typeof(FileHandler)))
+      if (!MyAPIGateway.Utilities.FileExistsInWorldStorage(FileName, typeof(FileHandler)))
         return null;
 
       TextReader reader = null;
       FileContent content = null;
       try
       {
-        reader = MyAPIGateway.Utilities.ReadFileInLocalStorage(FileName, typeof(FileHandler));
+        reader = MyAPIGateway.Utilities.ReadFileInWorldStorage(FileName, typeof(FileHandler));
         content = MyAPIGateway.Utilities.SerializeFromXML<FileContent>(reader.ReadToEnd());
       }
       catch (Exception e)
@@ -113,29 +88,16 @@ namespace Lima
 
     public class FileContent
     {
-      public List<AppContent> Apps = new List<AppContent>();
       public List<ManagerContent> Managers = new List<ManagerContent>();
 
-      public FileContent(List<ElectricNetworkInfoTSS> activeTSSs, List<ElectricNetworkManager> managers = null)
+      public FileContent(List<ElectricNetworkManager> managers = null)
       {
-        foreach (var tss in activeTSSs)
-          Apps.Add(tss.GenerateAppContent());
 
         foreach (var man in managers)
           Managers.Add(man.GenerateManagerContent());
       }
 
       public FileContent() { }
-    }
-
-    public struct AppContent
-    {
-      public long BlockId;
-      public string SurfaceName;
-
-      public int Layout;
-      public int ChartIntervalIndex;
-      public bool BatteryChartEnabled;
     }
 
     public struct ManagerContent
