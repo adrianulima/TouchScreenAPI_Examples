@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using Sandbox.Game.EntityComponents;
 using VRage;
 using SpaceEngineers.Game.ModAPI;
+using System.Linq;
 
 namespace Lima
 {
@@ -43,8 +44,7 @@ namespace Lima
     public PowerStats CurrentPowerStats = new PowerStats();
     public BatteryStats CurrentBatteryStats = new BatteryStats();
 
-    private readonly int _maxHistory = 1800; // 30 min
-    public readonly List<PowerStats> PowerStatsHistory = new List<PowerStats>();
+    public readonly PowerStatsHistory History = new PowerStatsHistory();
 
     private readonly List<IMyCubeGrid> _grids = new List<IMyCubeGrid>();
 
@@ -68,7 +68,7 @@ namespace Lima
       return new FileStorageHandler.ManagerContent()
       {
         GridId = _lcdBlocks[0].CubeGrid.EntityId,
-        PowerStatsHistory = PowerStatsHistory
+        History = History.Intervals.Select(i => i.Item3).ToArray()
       };
     }
 
@@ -79,14 +79,17 @@ namespace Lima
       {
         var content = loadContent.GetValueOrDefault();
 
-        PowerStatsHistory.AddRange(content.PowerStatsHistory);
+        for (int i = 0; i < History.Intervals.Length; i++)
+        {
+          History.Intervals[i].Item3 = content.History[i];
+        }
       }
     }
 
     public void Dispose()
     {
       Clear();
-      PowerStatsHistory.Clear();
+      History.Dispose();
       _lcdBlocks.Clear();
       UpdateEvent = null;
     }
@@ -311,15 +314,9 @@ namespace Lima
         }
       }
 
-      PowerStatsHistory.Add(CurrentPowerStats);
+      History.Add(CurrentPowerStats);
 
       UpdateEvent?.Invoke();
-    }
-
-    private void TrimHistoryLimit()
-    {
-      while (PowerStatsHistory.Count > _maxHistory)
-        PowerStatsHistory.RemoveAt(0);
     }
   }
 }

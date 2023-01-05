@@ -37,7 +37,7 @@ namespace Lima
 
       OverviewPanel = new OverviewPanel(OnChangeConfig);
       MainView.AddChild(OverviewPanel);
-      OverviewPanel.CreateElements();
+      OverviewPanel.CreateElements(_electricMan.History);
 
       EntitiesPanel = new EntitiesPanel();
       MainView.AddChild(EntitiesPanel);

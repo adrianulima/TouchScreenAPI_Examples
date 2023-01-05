@@ -20,7 +20,7 @@ namespace Lima
     public BatteryStorageView BatteryStorageView { get; private set; }
     public ChartView ChartPanel { get; private set; }
 
-    public void CreateElements()
+    public void CreateElements(PowerStatsHistory history)
     {
       Padding = new Vector4(4);
       Gap = 4;
@@ -44,7 +44,10 @@ namespace Lima
       AddChild(batteryAndChartPanel);
 
       // Chart Panel
-      ChartPanel = new ChartView(OnChangeConfig);
+      string[] intervalNames = new string[history.Intervals.Length];
+      for (int i = 0; i < intervalNames.Length; i++)
+        intervalNames[i] = history.Intervals[i].Item1;
+      ChartPanel = new ChartView(OnChangeConfig, intervalNames);
       batteryAndChartPanel.AddChild(ChartPanel);
 
       // Battery Storage bar
@@ -54,7 +57,7 @@ namespace Lima
 
     public void ApplySettings(AppContent content, ElectricNetworkManager electricMan)
     {
-      ChartPanel.UpdateValues(electricMan.PowerStatsHistory);
+      ChartPanel.UpdateValues(electricMan.History);
       ChartPanel.BatteryOutputAsProduction = content.BatteryChartEnabled;
       ChartPanel.ChartIntervalIndex = content.ChartIntervalIndex;
     }
@@ -81,7 +84,7 @@ namespace Lima
       ProductionStatus.UpdateValues();
       BatteryOutputStatus.UpdateValues();
       BatteryStorageView.UpdateValues();
-      ChartPanel.UpdateValues(electricMan.PowerStatsHistory);
+      ChartPanel.UpdateValues(electricMan.History);
     }
 
     public void Dispose()

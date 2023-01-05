@@ -81,7 +81,6 @@ namespace Lima
       var blockContent = GameSession.Instance.BlockHandler.SaveAppContent(_block, appContent);
       if (blockContent != null)
       {
-        Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"Broadcast", "SampleApp");
         blockContent.NetworkId = MyAPIGateway.Session.Player.SteamUserId;
         GameSession.Instance.NetHandler.Broadcast(blockContent);
       }

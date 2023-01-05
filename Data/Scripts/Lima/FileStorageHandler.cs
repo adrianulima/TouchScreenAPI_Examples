@@ -101,7 +101,7 @@ namespace Lima
     public struct ManagerContent
     {
       public long GridId;
-      public List<ElectricNetworkManager.PowerStats> PowerStatsHistory;
+      public ElectricNetworkManager.PowerStats[][] History;
     }
   }
 }

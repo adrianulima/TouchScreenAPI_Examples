@@ -3,14 +3,12 @@ using Lima.API;
 using System.Collections.Generic;
 using System;
 using VRage.Game.GUI.TextPanel;
-using System.Linq;
 
 namespace Lima
 {
   public class ChartView : FancyView
   {
-    private List<ElectricNetworkManager.PowerStats> _history;
-    private int _skip = 1;
+    private PowerStatsHistory _history;
 
     private FancyChart _chart;
     private FancyView _chartView;
@@ -32,6 +30,7 @@ namespace Lima
           return;
         _batteryOutputAsProduction = value;
         _batteryCheckbox.Value = _batteryOutputAsProduction;
+        UpdateChartDataSets();
         OnChangeConfig();
       }
     }
@@ -46,18 +45,18 @@ namespace Lima
           return;
         _chartIntervalIndex = value;
         _intervalSwitcher.Index = _chartIntervalIndex;
-        UpdateSkip();
+        UpdateChartDataSets();
         OnChangeConfig();
       }
     }
 
     public Action OnChangeConfig;
 
-    public ChartView(Action onChangeConfig) : base(ViewDirection.Column)
+    public ChartView(Action onChangeConfig, string[] intervalNames) : base(ViewDirection.Column)
     {
       OnChangeConfig = onChangeConfig;
 
-      CreateElements();
+      CreateElements(intervalNames);
 
       RegisterUpdate(Update);
     }
@@ -94,12 +93,11 @@ namespace Lima
       }
     }
 
-    private void CreateElements()
+    private void CreateElements(string[] intervalNames)
     {
-      _intervalSwitcher = new FancySwitch(new string[] { "30s", "1m", "5m", "10m", "30m" }, _chartIntervalIndex, (int v) =>
+      _intervalSwitcher = new FancySwitch(intervalNames, _chartIntervalIndex, (int v) =>
       {
         ChartIntervalIndex = v;
-        UpdateSkip();
       });
       AddChild(_intervalSwitcher);
 
@@ -191,38 +189,12 @@ namespace Lima
       _legendsView.AddChild(_batteryCheckbox);
     }
 
-    private void UpdateSkip()
-    {
-      switch (_chartIntervalIndex)
-      {
-        case 0:
-          _skip = 1;
-          break;
-        case 1:
-          _skip = 2; // 60 / 30;
-          break;
-        case 2:
-          _skip = 10; // (5 * 60) / 30;
-          break;
-        case 3:
-          _skip = 20; // (10 * 60) / 30;
-          break;
-        case 4:
-          _skip = 60; // (30 * 60) / 30;
-          break;
-        default:
-          _skip = 1;
-          break;
-      }
-      UpdateChartDataSets();
-    }
-
-    public void UpdateValues(List<ElectricNetworkManager.PowerStats> history)
+    public void UpdateValues(PowerStatsHistory history)
     {
       _history = history;
 
       // Prevent calling these methods every second if they won't give different results
-      if (_skip == 1 || _history.Count % _skip == 0)
+      if (_history.UpdatedLastIndex[ChartIntervalIndex])
         UpdateChartDataSets();
     }
 
@@ -230,8 +202,7 @@ namespace Lima
     {
       if (_history == null) return;
 
-      var count = 30;
-      var subSet = TakeOneEvery(TakeLast(_history, count * _skip), _skip).ToArray();
+      var subSet = _history.Intervals[ChartIntervalIndex].Item3;
       var len = subSet.Length;
 
       _dataSets[0] = new float[len];
@@ -253,18 +224,6 @@ namespace Lima
         _dataSets[2][i] = subSet[i].MaxConsumption;
         _dataSets[3][i] = subSet[i].Consumption;
       }
-    }
-
-    private IEnumerable<ElectricNetworkManager.PowerStats> TakeLast(IEnumerable<ElectricNetworkManager.PowerStats> list, int n)
-    {
-      return list.Skip(Math.Max(0, list.Count() - n));
-    }
-
-    private IEnumerable<ElectricNetworkManager.PowerStats> TakeOneEvery(IEnumerable<ElectricNetworkManager.PowerStats> list, int n)
-    {
-      if (n <= 1)
-        return list;
-      return list.Where((val, i) => i % n == 0);
     }
   }
 }
