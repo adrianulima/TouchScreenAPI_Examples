@@ -9,10 +9,13 @@ using VRage.Utils;
 namespace Lima
 {
   [ProtoContract(UseProtoMembersOnly = true)]
-  public class BlockStorageContent
+  public class BlockStorageContent : NetworkMessage
   {
     [ProtoMember(1)]
     public List<AppContent> Apps = new List<AppContent>();
+
+    [ProtoMember(2)]
+    public long BlockId;
 
     public BlockStorageContent() { }
 
@@ -54,7 +57,7 @@ namespace Lima
 
   public class BlockStorageHandler
   {
-    protected Guid StorageGuid { get; set; } = new Guid("AD71A300-ED4F-4075-BB00-0A51EB910132");
+    protected readonly Guid StorageGuid = new Guid("AD71A300-ED4F-4075-BB00-0A51EB910132");
 
     public AppContent? LoadAppContent(IMyCubeBlock block, string surfaceName)
     {
@@ -79,7 +82,7 @@ namespace Lima
       return null;
     }
 
-    public void SaveAppContent(IMyCubeBlock block, AppContent appContent)
+    public BlockStorageContent SaveAppContent(IMyCubeBlock block, AppContent appContent)
     {
       BlockStorageContent blockContent = null;
       string rawData;
@@ -87,6 +90,8 @@ namespace Lima
       {
         block.Storage = new MyModStorageComponent();
         blockContent = new BlockStorageContent();
+        blockContent.NetworkId = MyAPIGateway.Session.Player.SteamUserId;
+        blockContent.BlockId = block.EntityId;
       }
       else if (block.Storage.TryGetValue(StorageGuid, out rawData))
         blockContent = MyAPIGateway.Utilities.SerializeFromBinary<BlockStorageContent>(Convert.FromBase64String(rawData));
@@ -96,6 +101,16 @@ namespace Lima
         blockContent.AddOrUpdateAppContent(appContent);
         block.Storage.SetValue(StorageGuid, Convert.ToBase64String(MyAPIGateway.Utilities.SerializeToBinary(blockContent)));
       }
+
+      return blockContent;
+    }
+
+    public void SaveBlockContent(IMyCubeBlock block, BlockStorageContent blockContent)
+    {
+      if (block.Storage == null)
+        block.Storage = new MyModStorageComponent();
+
+      block.Storage.SetValue(StorageGuid, Convert.ToBase64String(MyAPIGateway.Utilities.SerializeToBinary(blockContent)));
     }
   }
 }

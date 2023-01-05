@@ -63,9 +63,9 @@ namespace Lima
       LoadAppContent();
     }
 
-    public FileHandler.ManagerContent GenerateManagerContent()
+    public FileStorageHandler.ManagerContent GenerateManagerContent()
     {
-      return new FileHandler.ManagerContent()
+      return new FileStorageHandler.ManagerContent()
       {
         GridId = _lcdBlocks[0].CubeGrid.EntityId,
         PowerStatsHistory = PowerStatsHistory
@@ -74,7 +74,7 @@ namespace Lima
 
     public void LoadAppContent()
     {
-      var loadContent = GameSession.Instance.Handler.GetManagerContent(_lcdBlocks[0].CubeGrid.EntityId);
+      var loadContent = GameSession.Instance.FileHandler.GetManagerContent(_lcdBlocks[0].CubeGrid.EntityId);
       if (loadContent != null)
       {
         var content = loadContent.GetValueOrDefault();

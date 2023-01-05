@@ -1,6 +1,5 @@
 using System;
 using Sandbox.Game.Entities;
-using Sandbox.Game.EntityComponents;
 using Sandbox.Game.GameSystems.TextSurfaceScripts;
 using Sandbox.ModAPI;
 using VRage.Game;
@@ -21,7 +20,6 @@ namespace Lima
     private IMyTextSurface _surface;
 
     private ElectricNetworkInfoApp _app;
-    private BlockStorageHandler _storageHandler;
 
     bool _init = false;
     int ticks = 0;
@@ -57,17 +55,16 @@ namespace Lima
       if (electricManager == null)
         return;
 
-      _storageHandler = new BlockStorageHandler();
-
       _app = new ElectricNetworkInfoApp(electricManager, SaveConfigAction);
       _app.InitApp(this.Block as MyCubeBlock, this.Surface as IMyTextSurface);
       _app.CreateElements();
       _app.Theme.Scale = Math.Min(Math.Max(this.Surface.SurfaceSize.Y / 256, 0.4f), 1);
 
-      var appContent = _storageHandler.LoadAppContent(_block, _surface.Name);
+      var appContent = GameSession.Instance.BlockHandler.LoadAppContent(_block, _surface.Name);
       if (appContent != null)
         _app.ApplySettings(appContent.GetValueOrDefault());
 
+      GameSession.Instance.NetHandler.MessageReceivedEvent += OnBlockContentReceived;
       _terminalBlock.OnMarkForClose += BlockMarkedForClose;
     }
 
@@ -81,7 +78,23 @@ namespace Lima
         BatteryChartEnabled = _app.OverviewPanel.ChartPanel.BatteryOutputAsProduction
       };
 
-      _storageHandler.SaveAppContent(_block, appContent);
+      var blockContent = GameSession.Instance.BlockHandler.SaveAppContent(_block, appContent);
+      if (blockContent != null)
+      {
+        Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"Broadcast", "SampleApp");
+        blockContent.NetworkId = MyAPIGateway.Session.Player.SteamUserId;
+        GameSession.Instance.NetHandler.Broadcast(blockContent);
+      }
+    }
+
+    private void OnBlockContentReceived(BlockStorageContent blockContent)
+    {
+      if (blockContent.BlockId != _block.EntityId)
+        return;
+
+      var appContent = blockContent.GetAppContent(_surface.Name);
+      if (appContent != null)
+        _app.ApplySettings(appContent.GetValueOrDefault());
     }
 
     public override void Dispose()
@@ -89,13 +102,14 @@ namespace Lima
       base.Dispose();
 
       GameSession.Instance.RemoveManagerFromBlock(_block);
-      // TODO: Consider clearing modstorage (_storageHandler)
+      // TODO: Consider clearing modstorage (GameSession.Instance._storageHandler)
 
       _app?.Dispose();
       _terminalBlock.OnMarkForClose -= BlockMarkedForClose;
+      GameSession.Instance.NetHandler.MessageReceivedEvent -= OnBlockContentReceived;
     }
 
-    void BlockMarkedForClose(IMyEntity ent)
+    private void BlockMarkedForClose(IMyEntity ent)
     {
       Dispose();
     }

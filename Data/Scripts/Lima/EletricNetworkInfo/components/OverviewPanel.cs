@@ -86,6 +86,7 @@ namespace Lima
 
     public void Dispose()
     {
+      OnChangeConfig = null;
     }
   }
 }

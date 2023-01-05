@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using Lima.API;
+using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
@@ -13,16 +15,34 @@ namespace Lima
     public static GameSession Instance;
 
     private List<ElectricNetworkManager> _electricManagers;
-    public FileHandler Handler = new FileHandler();
+    public BlockStorageHandler BlockHandler;
+    public FileStorageHandler FileHandler;
+    public NetworkHandler<BlockStorageContent> NetHandler;
 
     public override void LoadData()
     {
+      BlockHandler = new BlockStorageHandler();
+      NetHandler = new NetworkHandler<BlockStorageContent>();
+      NetHandler.Init(); // Init on server and clients
+
       if (MyAPIGateway.Utilities.IsDedicated)
+      {
+        NetHandler.MessageReceivedEvent += BlockContentReceivedServer;
         return;
+      }
 
       Instance = this;
+      FileHandler = new FileStorageHandler();
       Api = new TouchScreenAPI();
       Api.Load();
+    }
+
+    private void BlockContentReceivedServer(BlockStorageContent blockContent)
+    {
+      var block = MyAPIGateway.Entities.GetEntityById(blockContent.BlockId) as IMyCubeBlock;
+
+      if (block != null)
+        BlockHandler.SaveBlockContent(block, blockContent);
     }
 
     public ElectricNetworkManager GetElectricManagerForBlock(IMyCubeBlock lcdBlock)
@@ -64,6 +84,8 @@ namespace Lima
         foreach (var manager in _electricManagers)
           manager.Dispose();
 
+      GameSession.Instance.NetHandler.MessageReceivedEvent -= BlockContentReceivedServer;
+      NetHandler?.Dispose();
       Api?.Unload();
       Instance = null;
       _electricManagers = null;
@@ -78,7 +100,8 @@ namespace Lima
 
     public override void SaveData()
     {
-      Handler.Save(_electricManagers);
+      if (FileHandler != null)
+        FileHandler.Save(_electricManagers);
     }
   }
 }

@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Lima
 {
-  public class FileHandler
+  public class FileStorageHandler
   {
     public readonly string FileName = "ElectricInfo.cfg";
 
@@ -22,9 +22,7 @@ namespace Lima
       }
     }
 
-    public FileHandler()
-    {
-    }
+    public FileStorageHandler() { }
 
     public ManagerContent? GetManagerContent(long gridId)
     {
@@ -46,7 +44,7 @@ namespace Lima
       try
       {
         string stringXML = MyAPIGateway.Utilities.SerializeToXML(new FileContent(managers));
-        writer = MyAPIGateway.Utilities.WriteFileInWorldStorage(FileName, typeof(FileHandler));
+        writer = MyAPIGateway.Utilities.WriteFileInWorldStorage(FileName, typeof(FileStorageHandler));
         writer.Write(stringXML);
         writer.Flush();
       }
@@ -63,14 +61,14 @@ namespace Lima
 
     public FileContent Load()
     {
-      if (!MyAPIGateway.Utilities.FileExistsInWorldStorage(FileName, typeof(FileHandler)))
+      if (!MyAPIGateway.Utilities.FileExistsInWorldStorage(FileName, typeof(FileStorageHandler)))
         return null;
 
       TextReader reader = null;
       FileContent content = null;
       try
       {
-        reader = MyAPIGateway.Utilities.ReadFileInWorldStorage(FileName, typeof(FileHandler));
+        reader = MyAPIGateway.Utilities.ReadFileInWorldStorage(FileName, typeof(FileStorageHandler));
         content = MyAPIGateway.Utilities.SerializeFromXML<FileContent>(reader.ReadToEnd());
       }
       catch (Exception e)

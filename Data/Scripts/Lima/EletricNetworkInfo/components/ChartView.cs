@@ -28,6 +28,8 @@ namespace Lima
       get { return _batteryOutputAsProduction; }
       set
       {
+        if (_batteryOutputAsProduction == value)
+          return;
         _batteryOutputAsProduction = value;
         _batteryCheckbox.Value = _batteryOutputAsProduction;
         OnChangeConfig();
@@ -96,7 +98,7 @@ namespace Lima
     {
       _intervalSwitcher = new FancySwitch(new string[] { "30s", "1m", "5m", "10m", "30m" }, _chartIntervalIndex, (int v) =>
       {
-        _chartIntervalIndex = v;
+        ChartIntervalIndex = v;
         UpdateSkip();
       });
       AddChild(_intervalSwitcher);
