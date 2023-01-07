@@ -34,14 +34,16 @@ namespace Lima
     }
 
     int _index = 0;
-    public void Add(ElectricNetworkManager.PowerStats powerStats)
+    public void AddStats(ElectricNetworkManager.PowerStats powerStats)
     {
-      for (int i = 0; i < Intervals.Length; i++)
+      var len = Intervals.Length;
+      for (int i = 0; i < len; i++)
         if (UpdatedLastIndex[i] = _index % Intervals[i].Item2 == 0)
           ShiftAndAdd(Intervals[i].Item3, powerStats);
 
+      if (UpdatedLastIndex[len - 1])
+        _index = 0;
       _index++;
-      // TODO: Reset index
     }
 
     private void ShiftAndAdd(ElectricNetworkManager.PowerStats[] array, ElectricNetworkManager.PowerStats powerStats)

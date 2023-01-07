@@ -8,19 +8,26 @@ using System.Collections.Generic;
 using Sandbox.Game.EntityComponents;
 using VRage;
 using SpaceEngineers.Game.ModAPI;
-using System.Linq;
+using ProtoBuf;
 
 namespace Lima
 {
   public class ElectricNetworkManager
   {
+    [ProtoContract(UseProtoMembersOnly = true)]
     public struct PowerStats
     {
+      [ProtoMember(1)]
       public float Consumption;
+      [ProtoMember(2)]
       public float MaxConsumption;
+      [ProtoMember(3)]
       public float Production;
+      [ProtoMember(4)]
       public float MaxProduction;
+      [ProtoMember(5)]
       public float BatteryOutput;
+      [ProtoMember(6)]
       public float BatteryMaxOutput;
     }
 
@@ -37,8 +44,6 @@ namespace Lima
     private readonly List<IMyCubeBlock> _lcdBlocks;
     private MyDefinitionId _electricityId = MyResourceDistributorComponent.ElectricityId;
 
-    public const int TicksPerSecond = (int)((MyEngineConstants.UPDATE_STEPS_PER_MINUTE / 60));
-    private int _tick = TicksPerSecond - 1;
     public event Action UpdateEvent;
 
     public PowerStats CurrentPowerStats = new PowerStats();
@@ -63,26 +68,29 @@ namespace Lima
       LoadAppContent();
     }
 
-    public FileStorageHandler.ManagerContent GenerateManagerContent()
+    public MyTuple<IMyCubeGrid, GridStorageContent> GenerateGridContent()
     {
-      return new FileStorageHandler.ManagerContent()
+      return new MyTuple<IMyCubeGrid, GridStorageContent>(_lcdBlocks[0].CubeGrid, new GridStorageContent()
       {
         GridId = _lcdBlocks[0].CubeGrid.EntityId,
-        History = History.Intervals.Select(i => i.Item3).ToArray()
-      };
+        History_0 = History.Intervals[0].Item3,
+        History_1 = History.Intervals[1].Item3,
+        History_2 = History.Intervals[2].Item3,
+        History_3 = History.Intervals[3].Item3,
+        History_4 = History.Intervals[4].Item3
+      });
     }
 
     public void LoadAppContent()
     {
-      var loadContent = GameSession.Instance.FileHandler.GetManagerContent(_lcdBlocks[0].CubeGrid.EntityId);
-      if (loadContent != null)
+      var content = GameSession.Instance.GridHandler.LoadGridContent(_lcdBlocks[0].CubeGrid);
+      if (content != null)
       {
-        var content = loadContent.GetValueOrDefault();
-
-        for (int i = 0; i < History.Intervals.Length; i++)
-        {
-          History.Intervals[i].Item3 = content.History[i];
-        }
+        History.Intervals[0].Item3 = content.History_0;
+        History.Intervals[1].Item3 = content.History_1;
+        History.Intervals[2].Item3 = content.History_2;
+        History.Intervals[3].Item3 = content.History_3;
+        History.Intervals[4].Item3 = content.History_4;
       }
     }
 
@@ -231,12 +239,16 @@ namespace Lima
       CurrentBatteryStats.EnergyState = distributor.ResourceStateByType(MyResourceDistributorComponent.ElectricityId, grid: grid);
     }
 
+    double prevTime = 0;
     public void Update()
     {
-      _tick++;
-      if (_tick % (TicksPerSecond * 1) != 0)// 1 second
+      // TODO: implement a tag to check if there is any tss that still active (player not distant)
+
+      var secs = MyAPIGateway.Session.ElapsedPlayTime.TotalSeconds;
+      var diff = prevTime == 0 ? 0 : secs - prevTime - 1;
+      if (diff < 0)
         return;
-      _tick = 0;
+      prevTime = secs - diff;
 
       CurrentPowerStats = new PowerStats();
       CurrentBatteryStats = new BatteryStats();
@@ -314,7 +326,18 @@ namespace Lima
         }
       }
 
-      History.Add(CurrentPowerStats);
+      History.AddStats(CurrentPowerStats);
+
+      if (MyAPIGateway.Multiplayer.MultiplayerActive && History.UpdatedLastIndex[4]) // every 60 seconds
+      {
+        var player = MyAPIGateway.Session.Player;
+        var relation = (_lcdBlocks[0].OwnerId > 0 ? player.GetRelationTo(_lcdBlocks[0].OwnerId) : MyRelationsBetweenPlayerAndBlock.NoOwnership);
+        if (relation == MyRelationsBetweenPlayerAndBlock.Owner)
+        {
+          var gridContent = GenerateGridContent().Item2;
+          GameSession.Instance.NetGridHandler.Broadcast(gridContent);
+        }
+      }
 
       UpdateEvent?.Invoke();
     }

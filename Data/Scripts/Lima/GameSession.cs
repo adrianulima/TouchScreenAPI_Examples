@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Lima.API;
 using Sandbox.ModAPI;
+using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 
@@ -14,33 +15,47 @@ namespace Lima
 
     private List<ElectricNetworkManager> _electricManagers;
     public BlockStorageHandler BlockHandler;
-    public FileStorageHandler FileHandler;
-    public NetworkHandler<BlockStorageContent> NetHandler;
+    public GridStorageHandler GridHandler;
+    public NetworkHandler<BlockStorageContent> NetBlockHandler;
+    public NetworkHandler<GridStorageContent> NetGridHandler;
 
     public override void LoadData()
     {
+      // For server and clients
       BlockHandler = new BlockStorageHandler();
-      NetHandler = new NetworkHandler<BlockStorageContent>();
-      NetHandler.Init(); // Init on server and clients
+      GridHandler = new GridStorageHandler();
+      NetBlockHandler = new NetworkHandler<BlockStorageContent>(041414);
+      NetBlockHandler.Init();
+      NetGridHandler = new NetworkHandler<GridStorageContent>(011414);
+      NetGridHandler.Init();
+      NetGridHandler.AutoBroadcastEnabled = false;
 
       if (MyAPIGateway.Utilities.IsDedicated)
       {
-        NetHandler.MessageReceivedEvent += BlockContentReceivedServer;
+        // Only for server
+        NetBlockHandler.MessageReceivedEvent += NetwrokBlockReceivedServer;
+        NetGridHandler.MessageReceivedEvent += NetwrokGridReceivedServer;
         return;
       }
 
+      // Only for clients
       Instance = this;
-      FileHandler = new FileStorageHandler();
       Api = new TouchScreenAPI();
       Api.Load();
     }
 
-    private void BlockContentReceivedServer(BlockStorageContent blockContent)
+    private void NetwrokBlockReceivedServer(BlockStorageContent blockContent)
     {
       var block = MyAPIGateway.Entities.GetEntityById(blockContent.BlockId) as IMyCubeBlock;
-
       if (block != null)
         BlockHandler.SaveBlockContent(block, blockContent);
+    }
+
+    private void NetwrokGridReceivedServer(GridStorageContent gridContent)
+    {
+      var grid = MyAPIGateway.Entities.GetEntityById(gridContent.GridId) as IMyCubeGrid;
+      if (grid != null)
+        GridHandler.SaveGridContent(grid, gridContent);
     }
 
     public ElectricNetworkManager GetElectricManagerForBlock(IMyCubeBlock lcdBlock)
@@ -82,8 +97,10 @@ namespace Lima
         foreach (var manager in _electricManagers)
           manager.Dispose();
 
-      GameSession.Instance.NetHandler.MessageReceivedEvent -= BlockContentReceivedServer;
-      NetHandler?.Dispose();
+      GameSession.Instance.NetBlockHandler.MessageReceivedEvent -= NetwrokBlockReceivedServer;
+      GameSession.Instance.NetGridHandler.MessageReceivedEvent -= NetwrokGridReceivedServer;
+      NetBlockHandler?.Dispose();
+      NetGridHandler?.Dispose();
       Api?.Unload();
       Instance = null;
       _electricManagers = null;
@@ -96,10 +113,17 @@ namespace Lima
           manager.Update();
     }
 
-    public override void SaveData()
+    public override MyObjectBuilder_SessionComponent GetObjectBuilder()
     {
-      if (FileHandler != null)
-        FileHandler.Save(_electricManagers);
+      if (_electricManagers != null)
+      {
+        foreach (var manager in _electricManagers)
+        {
+          var gridTuple = manager.GenerateGridContent();
+          GridHandler.SaveGridContent(gridTuple.Item1, gridTuple.Item2);
+        }
+      }
+      return base.GetObjectBuilder();
     }
   }
 }

@@ -64,11 +64,19 @@ namespace Lima
       if (appContent != null)
         _app.ApplySettings(appContent.GetValueOrDefault());
 
-      GameSession.Instance.NetHandler.MessageReceivedEvent += OnBlockContentReceived;
+      GameSession.Instance.NetBlockHandler.MessageReceivedEvent += OnBlockContentReceived;
       _terminalBlock.OnMarkForClose += BlockMarkedForClose;
     }
 
-    public void SaveConfigAction()
+    private bool IsOwnerOrFactionShare()
+    {
+      var player = MyAPIGateway.Session.Player;
+      var relation = (_block.OwnerId > 0 ? player.GetRelationTo(_block.OwnerId) : MyRelationsBetweenPlayerAndBlock.NoOwnership);
+
+      return relation == MyRelationsBetweenPlayerAndBlock.Owner || relation == MyRelationsBetweenPlayerAndBlock.FactionShare;
+    }
+
+    private void SaveConfigAction()
     {
       var appContent = new AppContent()
       {
@@ -79,10 +87,10 @@ namespace Lima
       };
 
       var blockContent = GameSession.Instance.BlockHandler.SaveAppContent(_block, appContent);
-      if (blockContent != null)
+      if (MyAPIGateway.Multiplayer.MultiplayerActive && blockContent != null)
       {
         blockContent.NetworkId = MyAPIGateway.Session.Player.SteamUserId;
-        GameSession.Instance.NetHandler.Broadcast(blockContent);
+        GameSession.Instance.NetBlockHandler.Broadcast(blockContent);
       }
     }
 
@@ -105,7 +113,7 @@ namespace Lima
 
       _app?.Dispose();
       _terminalBlock.OnMarkForClose -= BlockMarkedForClose;
-      GameSession.Instance.NetHandler.MessageReceivedEvent -= OnBlockContentReceived;
+      GameSession.Instance.NetBlockHandler.MessageReceivedEvent -= OnBlockContentReceived;
     }
 
     private void BlockMarkedForClose(IMyEntity ent)
@@ -115,9 +123,13 @@ namespace Lima
 
     public override void Run()
     {
+      // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"Run", "SampleApp");
       try
       {
         if (!_init && ticks++ < (6 * 2)) // 2 secs
+          return;
+
+        if (!IsOwnerOrFactionShare())
           return;
 
         if (!_init)

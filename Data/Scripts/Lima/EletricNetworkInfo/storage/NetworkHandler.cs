@@ -8,21 +8,30 @@ using VRage.Utils;
 namespace Lima
 {
   [ProtoInclude(2, typeof(BlockStorageContent))]
+  [ProtoInclude(3, typeof(GridStorageContent))]
   [ProtoContract(UseProtoMembersOnly = true)]
   public abstract class NetworkMessage
   {
     [ProtoMember(1)]
     public ulong NetworkId;
+
+    public NetworkMessage() { }
   }
 
   public class NetworkHandler<T> where T : NetworkMessage
   {
-    // TODO: Replace by mod id
-    private const ushort _channel = 041414;
+    private ushort _channel;
 
     private List<IMyPlayer> _players = null;
 
     public event Action<T> MessageReceivedEvent;
+
+    public bool AutoBroadcastEnabled = true;
+
+    public NetworkHandler(ushort channel)
+    {
+      _channel = channel;
+    }
 
     public void Init()
     {
@@ -45,12 +54,10 @@ namespace Lima
 
     private void HandleMessage(ushort handler, byte[] rawData, ulong id, bool isFromServer)
     {
-      // MyLog.Default.WriteLineAndConsole($"====== HandleMessage isFromServer {isFromServer}");
       try
       {
         var message = MyAPIGateway.Utilities.SerializeFromBinary<T>(rawData);
-        // MyLog.Default.WriteLineAndConsole($"====== HandleMessage {message.NetworkId}");
-        if (!isFromServer && MyAPIGateway.Multiplayer.IsServer)
+        if (!isFromServer && MyAPIGateway.Multiplayer.IsServer && AutoBroadcastEnabled)
           ForwardToPlayers(message, rawData);
 
         MessageReceivedEvent?.Invoke(message);
@@ -61,15 +68,8 @@ namespace Lima
       }
     }
 
-    int count = 0;
     private void ForwardToPlayers(T message, byte[] rawData)
     {
-      if (count > 10)
-        return;
-      count += 1;
-
-      // MyLog.Default.WriteLineAndConsole($"====== ForwardToPlayers {count}");
-
       if (_players == null)
         _players = new List<IMyPlayer>(MyAPIGateway.Session.SessionSettings.MaxPlayers);
       else
@@ -77,16 +77,11 @@ namespace Lima
 
       MyAPIGateway.Players.GetPlayers(_players);
 
-      // MyLog.Default.WriteLineAndConsole($"====== _players.Count {_players.Count}");
-      // MyLog.Default.WriteLineAndConsole($"====== ServerId {MyAPIGateway.Multiplayer.ServerId}");
-      // MyLog.Default.WriteLineAndConsole($"====== message.NetworkId {message.NetworkId}");
-
       foreach (var player in _players)
       {
         if (player.IsBot || player.SteamUserId == MyAPIGateway.Multiplayer.ServerId || player.SteamUserId == message.NetworkId)
           continue;
 
-        // MyLog.Default.WriteLineAndConsole($"====== Sending to {player.SteamUserId}");
         MyAPIGateway.Multiplayer.SendMessageTo(_channel, rawData, player.SteamUserId);
       }
 
