@@ -62,8 +62,8 @@ namespace Lima
       if (_countLabel.Text != countText)
       {
         _countLabel.Text = countText;
-        var px = App?.Theme.MeasureStringInPixels(countText, App.Theme.Font, 0.4f).X;
-        _countLabel.Pixels = new Vector2(px ?? 0, 0);
+        var px = (App?.Theme.MeasureStringInPixels(countText, App.Theme.Font, 0.4f).X ?? 0) + 2;
+        _countLabel.Pixels = new Vector2(px, 0);
       }
 
       var sv = ElectricNetworkInfoApp.PowerFormat(Value);

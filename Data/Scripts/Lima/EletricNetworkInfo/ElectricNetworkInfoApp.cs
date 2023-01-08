@@ -13,6 +13,9 @@ namespace Lima
     public WindowButtons WindowBarButtons;
     public OverviewPanel OverviewPanel;
     public EntitiesPanel EntitiesPanel;
+    public HelpView HelpView;
+
+    private bool _helpOpen = false;
 
     public Action SaveConfigAction;
 
@@ -29,7 +32,7 @@ namespace Lima
       var windowBar = new FancyWindowBar("Electric Network Info");
       AddChild(windowBar);
 
-      WindowBarButtons = new WindowButtons(OnChangeConfig);
+      WindowBarButtons = new WindowButtons(OnChangeConfig, OnChangePage);
       windowBar.AddChild(WindowBarButtons);
 
       MainView = new FancyView();
@@ -42,6 +45,22 @@ namespace Lima
       EntitiesPanel = new EntitiesPanel();
       MainView.AddChild(EntitiesPanel);
       EntitiesPanel.CreateElements();
+
+      HelpView = new HelpView();
+      AddChild(HelpView);
+      HelpView.CreateElements();
+      HelpView.Enabled = false;
+    }
+
+    public void OnChangePage(string page)
+    {
+      if (page == "help")
+        _helpOpen = !_helpOpen;
+
+      MainView.Enabled = !_helpOpen;
+      HelpView.Enabled = _helpOpen;
+
+      WindowBarButtons.LayoutButton.Enabled = MainView.Enabled;
     }
 
     public void OnChangeConfig()

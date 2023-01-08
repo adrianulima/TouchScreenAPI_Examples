@@ -16,10 +16,12 @@ namespace Lima
     public int CurrentLayout = 0;
 
     public Action OnChangeConfig;
+    public Action<string> OnChangePage;
 
-    public WindowButtons(Action onChangeConfig)
+    public WindowButtons(Action onChangeConfig, Action<string> onChangePage)
     {
       OnChangeConfig = onChangeConfig;
+      OnChangePage = onChangePage;
 
       Direction = ViewDirection.RowReverse;
       Anchor = ViewAnchor.End;
@@ -54,10 +56,12 @@ namespace Lima
 
     private void OnClickHelp()
     {
+      OnChangePage("help");
     }
 
     private void OnClickSettings()
     {
+      OnChangePage("settings");
     }
 
     private void OnClickLayout()
