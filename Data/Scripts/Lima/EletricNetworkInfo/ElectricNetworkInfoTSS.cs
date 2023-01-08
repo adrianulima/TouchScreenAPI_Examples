@@ -83,7 +83,8 @@ namespace Lima
         SurfaceName = _surface.Name,
         Layout = _app.WindowBarButtons.CurrentLayout,
         ChartIntervalIndex = _app.OverviewPanel.ChartPanel.ChartIntervalIndex,
-        BatteryChartEnabled = _app.OverviewPanel.ChartPanel.BatteryOutputAsProduction
+        BatteryChartEnabled = _app.OverviewPanel.ChartPanel.BatteryOutputAsProduction,
+        ChartDataColors = _app.OverviewPanel.ChartPanel.DataColors
       };
 
       var blockContent = GameSession.Instance.BlockHandler.SaveAppContent(_block, appContent);

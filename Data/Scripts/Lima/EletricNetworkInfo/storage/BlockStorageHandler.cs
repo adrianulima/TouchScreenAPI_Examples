@@ -5,6 +5,7 @@ using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
 using VRage.Utils;
+using VRageMath;
 
 namespace Lima
 {
@@ -53,6 +54,9 @@ namespace Lima
 
     [ProtoMember(4)]
     public bool BatteryChartEnabled;
+
+    [ProtoMember(5)]
+    public List<Color> ChartDataColors;
   }
 
   public class BlockStorageHandler

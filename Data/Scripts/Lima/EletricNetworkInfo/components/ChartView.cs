@@ -50,6 +50,10 @@ namespace Lima
       }
     }
 
+    public List<Color> DataColors { get { return _chart.DataColors; } }
+
+    public Color[] DefaultColors = new Color[] { Color.White, new Color(0, 255, 0), Color.DeepPink, Color.OrangeRed };
+
     public Action OnChangeConfig;
 
     public ChartView(Action onChangeConfig, string[] intervalNames) : base(ViewDirection.Column)
@@ -155,10 +159,10 @@ namespace Lima
       _dataSets.Add(null);
       _dataSets.Add(null);
       _dataSets.Add(null);
-      _chart.DataColors.Add(Color.FloralWhite);
-      _chart.DataColors.Add(Color.DarkViolet);
-      _chart.DataColors.Add(Color.SlateGray);
-      _chart.DataColors.Add(Color.OrangeRed);
+      _chart.DataColors.Add(DefaultColors[0]);
+      _chart.DataColors.Add(DefaultColors[1]);
+      _chart.DataColors.Add(DefaultColors[2]);
+      _chart.DataColors.Add(DefaultColors[3]);
       _chart.GridHorizontalLines = 5;
       _chart.GridVerticalLines = 13;
       chartWrapper.AddChild(_chart);
@@ -170,16 +174,16 @@ namespace Lima
       AddChild(_legendsView);
 
       _legends = new LegendItem[4];
-      _legends[0] = new LegendItem("Consumption", Color.OrangeRed);
+      _legends[0] = new LegendItem("Consumption", DefaultColors[3]);
       _legends[0].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[0]);
-      _legends[1] = new LegendItem("Max Consum.", Color.SlateGray);
+      _legends[1] = new LegendItem("Max Consum.", DefaultColors[2]);
       _legends[1].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[1]);
-      _legends[2] = new LegendItem("Production", Color.DarkViolet);
+      _legends[2] = new LegendItem("Production", DefaultColors[1]);
       _legends[2].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[2]);
-      _legends[3] = new LegendItem("Capacity", Color.FloralWhite);
+      _legends[3] = new LegendItem("Capacity", DefaultColors[0]);
       _legends[3].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[3]);
 
@@ -194,6 +198,12 @@ namespace Lima
       }, BatteryOutputAsProduction);
       _batteryCheckbox.Pixels = new Vector2(16);
       _legendsView.AddChild(_batteryCheckbox);
+    }
+
+    public void ApplyColors()
+    {
+      for (int i = 0; i < _legends.Length; i++)
+        _legends[i].UpdateColor(_chart.DataColors[3 - i]);
     }
 
     public void UpdateValues(PowerStatsHistory history)

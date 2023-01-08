@@ -60,6 +60,13 @@ namespace Lima
       ChartPanel.UpdateValues(electricMan.History);
       ChartPanel.BatteryOutputAsProduction = content.BatteryChartEnabled;
       ChartPanel.ChartIntervalIndex = content.ChartIntervalIndex;
+
+      if (content.ChartDataColors != null)
+      {
+        for (int i = 0; i < 4; i++)
+          ChartPanel.DataColors[i] = content.ChartDataColors[i];
+        ChartPanel.ApplyColors();
+      }
     }
 
     public void UpdateValues(ElectricNetworkManager electricMan)

@@ -44,6 +44,12 @@ namespace Lima
       AddChild(_titleLabel);
     }
 
+    public void UpdateColor(Color color)
+    {
+      _color = color;
+      _square.BgColor = _color;
+    }
+
     public void UpdateValues()
     {
       var sv = ElectricNetworkInfoApp.PowerFormat(Value);

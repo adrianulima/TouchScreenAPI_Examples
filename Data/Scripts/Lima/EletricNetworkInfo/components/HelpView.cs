@@ -90,7 +90,7 @@ namespace Lima
       touchLabel.AutoBreakLine = true;
       touchLabel.TextColor = Color.Yellow;
       AddChild(touchLabel);
-      var touchText = new FancyLabel("Touch screen feature is provided by TouchScreenAPI mod (Steam # 2668820525).\nWhich makes both cursor and ui elements available for any modder interest.\nSend me a direct message on Steam or Discord.", 0.5f);
+      var touchText = new FancyLabel("Touch screen feature is provided by TouchScreenAPI mod (Steam # 2668820525).\nWhich makes both cursor and UI elements available for any modder.\nSend me a direct message on Steam or Discord.", 0.5f);
       touchText.AutoBreakLine = true;
       touchText.Margin = new Vector4(0, 0, 0, 10);
       AddChild(touchText);

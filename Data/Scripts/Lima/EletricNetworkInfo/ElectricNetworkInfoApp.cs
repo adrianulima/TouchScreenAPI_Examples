@@ -53,7 +53,7 @@ namespace Lima
       HelpView.CreateElements();
       HelpView.Enabled = false;
 
-      SettingsView = new SettingsView();
+      SettingsView = new SettingsView(OverviewPanel.ChartPanel, OnChangeConfig);
       AddChild(SettingsView);
       SettingsView.CreateElements();
       SettingsView.Enabled = false;
@@ -70,6 +70,8 @@ namespace Lima
       {
         _settingsOpen = !_settingsOpen;
         _helpOpen = false;
+        SettingsView.UpdateAppThemeColors();
+        SettingsView.OnClickCancel();
       }
       else
       {
