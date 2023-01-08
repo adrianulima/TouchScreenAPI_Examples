@@ -106,11 +106,34 @@ namespace Lima
       _electricManagers = null;
     }
 
+    bool wasPaused = false;
+    double prevTime = 0;
     public override void UpdateAfterSimulation()
     {
+      if (MyAPIGateway.Utilities.IsDedicated)
+        return;
+
+      if (wasPaused)
+      {
+        prevTime = MyAPIGateway.Session.ElapsedPlayTime.TotalSeconds;
+        wasPaused = false;
+      }
+
+      var secs = MyAPIGateway.Session.ElapsedPlayTime.TotalSeconds;
+      var diff = prevTime == 0 ? 0 : secs - prevTime - 1;
+      if (diff < 0)
+        return;
+      prevTime = secs - diff;
+
       if (_electricManagers != null)
         foreach (var manager in _electricManagers)
           manager.Update();
+    }
+
+    public override void UpdatingStopped()
+    {
+      base.UpdatingStopped();
+      wasPaused = true;
     }
 
     public override MyObjectBuilder_SessionComponent GetObjectBuilder()

@@ -109,7 +109,6 @@ namespace Lima
       base.Dispose();
 
       GameSession.Instance.RemoveManagerFromBlock(_block);
-      // TODO: Consider clearing modstorage (GameSession.Instance._storageHandler)
 
       _app?.Dispose();
       _terminalBlock.OnMarkForClose -= BlockMarkedForClose;

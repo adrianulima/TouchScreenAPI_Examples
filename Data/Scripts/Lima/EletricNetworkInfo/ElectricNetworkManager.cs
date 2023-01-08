@@ -239,16 +239,9 @@ namespace Lima
       CurrentBatteryStats.EnergyState = distributor.ResourceStateByType(MyResourceDistributorComponent.ElectricityId, grid: grid);
     }
 
-    double prevTime = 0;
     public void Update()
     {
       // TODO: implement a tag to check if there is any tss that still active (player not distant)
-
-      var secs = MyAPIGateway.Session.ElapsedPlayTime.TotalSeconds;
-      var diff = prevTime == 0 ? 0 : secs - prevTime - 1;
-      if (diff < 0)
-        return;
-      prevTime = secs - diff;
 
       CurrentPowerStats = new PowerStats();
       CurrentBatteryStats = new BatteryStats();
