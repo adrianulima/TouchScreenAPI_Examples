@@ -16,7 +16,7 @@ namespace Lima
     private FancyView _labelsWrapper;
     private List<float[]> _dataSets;
     private LegendItem[] _legends;
-    private FancyLabel[] _labels;
+    private List<FancyLabel> _labels;
     private FancySwitch _intervalSwitcher;
     private FancyCheckbox _batteryCheckbox;
 
@@ -73,22 +73,53 @@ namespace Lima
       foreach (var leg in _legends)
         leg.UpdateTitleColor(color);
 
+      UpdateChartLines();
+      UpdateChartLabels(color);
+    }
+
+    private void UpdateChartLines()
+    {
+      var size = _chart.GetSize();
+      var linesH = (int)Math.Floor(size.Y / 24);
+      _chart.GridHorizontalLines = linesH;
+      var linesV = (int)Math.Floor(size.X / (size.Y / linesH));
+      _chart.GridVerticalLines = linesV - 2;
+    }
+
+    private void UpdateChartLabels(Color color)
+    {
+      var count = _chart.GridHorizontalLines;
+      if (count > 5)
+      {
+        count = count / 2;
+        if (count % 2 != 0)
+          count++;
+      }
+      var countMax = Math.Max(count, _labels.Count);
+      for (int i = 0; i < countMax; i++)
+      {
+        while (i > _labels.Count - 1)
+        {
+          _labels.Add(new FancyLabel("1000 MW"));
+          _labels[i].FontSize = 0.4f;
+          _labels[i].Alignment = TextAlignment.RIGHT;
+          _labelsWrapper.AddChild(_labels[i]);
+        }
+        _labels[i].Enabled = false;
+      }
+
       var min = _chart.MinValue;
       if (min != float.MaxValue)
       {
-        var len = _labels.Length;
-        var interval = (_chart.MaxValue - min) / (len - 1);
+        var interval = (_chart.MaxValue - min) / (count - 1);
         if (interval > 0)
         {
-          for (int i = 0; i < len; i++)
+          for (int i = 0; i < count; i++)
           {
             _labels[i].Enabled = true;
             _labels[i].TextColor = color;
-            _labels[i].Text = $"{ElectricNetworkInfoApp.PowerFormat(min + interval * (len - 1 - i), "0")}";
+            _labels[i].Text = $"{ElectricNetworkInfoApp.PowerFormat(min + interval * (count - 1 - i), "0")}";
           }
-
-          var gap = (_labelsWrapper.GetSize().Y - (len * _labels[0].GetSize().Y)) / (len - 1);
-          _labelsWrapper.Gap = (int)gap;
         }
       }
     }
@@ -108,34 +139,10 @@ namespace Lima
       _labelsWrapper = new FancyView(ViewDirection.Column);
       _labelsWrapper.Scale = new Vector2(0, 1);
       _labelsWrapper.Pixels = new Vector2(50, 0);
+      _labelsWrapper.Anchor = ViewAnchor.SpaceBetween;
       _chartView.AddChild(_labelsWrapper);
 
-      _labels = new FancyLabel[5];
-      _labels[0] = new FancyLabel("1000 MW");
-      _labels[0].FontSize = 0.4f;
-      _labels[0].Enabled = false;
-      _labels[0].Alignment = TextAlignment.RIGHT;
-      _labelsWrapper.AddChild(_labels[0]);
-      _labels[1] = new FancyLabel("1000 MW");
-      _labels[1].FontSize = 0.4f;
-      _labels[1].Enabled = false;
-      _labels[1].Alignment = TextAlignment.RIGHT;
-      _labelsWrapper.AddChild(_labels[1]);
-      _labels[2] = new FancyLabel("1000 MW");
-      _labels[2].FontSize = 0.4f;
-      _labels[2].Enabled = false;
-      _labels[2].Alignment = TextAlignment.RIGHT;
-      _labelsWrapper.AddChild(_labels[2]);
-      _labels[3] = new FancyLabel("1000 MW");
-      _labels[3].FontSize = 0.4f;
-      _labels[3].Enabled = false;
-      _labels[3].Alignment = TextAlignment.RIGHT;
-      _labelsWrapper.AddChild(_labels[3]);
-      _labels[4] = new FancyLabel("1000 MW");
-      _labels[4].FontSize = 0.4f;
-      _labels[4].Enabled = false;
-      _labels[4].Alignment = TextAlignment.RIGHT;
-      _labelsWrapper.AddChild(_labels[4]);
+      _labels = new List<FancyLabel>();
 
       var chartWrapper = new FancyView(ViewDirection.Row);
       chartWrapper.Padding = new Vector4(4, 4, 0, 4);

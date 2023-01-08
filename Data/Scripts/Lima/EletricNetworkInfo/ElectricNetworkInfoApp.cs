@@ -13,9 +13,11 @@ namespace Lima
     public WindowButtons WindowBarButtons;
     public OverviewPanel OverviewPanel;
     public EntitiesPanel EntitiesPanel;
+    public SettingsView SettingsView;
     public HelpView HelpView;
 
     private bool _helpOpen = false;
+    private bool _settingsOpen = false;
 
     public Action SaveConfigAction;
 
@@ -50,15 +52,34 @@ namespace Lima
       AddChild(HelpView);
       HelpView.CreateElements();
       HelpView.Enabled = false;
+
+      SettingsView = new SettingsView();
+      AddChild(SettingsView);
+      SettingsView.CreateElements();
+      SettingsView.Enabled = false;
     }
 
     public void OnChangePage(string page)
     {
       if (page == "help")
+      {
         _helpOpen = !_helpOpen;
+        _settingsOpen = false;
+      }
+      else if (page == "settings")
+      {
+        _settingsOpen = !_settingsOpen;
+        _helpOpen = false;
+      }
+      else
+      {
+        _settingsOpen = false;
+        _helpOpen = false;
+      }
 
-      MainView.Enabled = !_helpOpen;
-      HelpView.Enabled = _helpOpen;
+      MainView.Enabled = !_helpOpen && !_settingsOpen;
+      SettingsView.Enabled = !_helpOpen && _settingsOpen;
+      HelpView.Enabled = _helpOpen && !_settingsOpen;
 
       WindowBarButtons.LayoutButton.Enabled = MainView.Enabled;
     }
