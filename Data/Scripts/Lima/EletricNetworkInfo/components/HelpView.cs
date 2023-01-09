@@ -63,7 +63,7 @@ namespace Lima
       batteryStorageLabel.AutoBreakLine = true;
       batteryStorageLabel.TextColor = Color.Yellow;
       AddChild(batteryStorageLabel);
-      var batteryStorageText = new FancyLabel("Time until the battery is depleted.\nIf red border, the system is overloaded. Needs more production.", 0.5f);
+      var batteryStorageText = new FancyLabel("Time until the battery is depleted.\nIf red border, the system is overloaded. Needs more power production.", 0.5f);
       batteryStorageText.AutoBreakLine = true;
       batteryStorageText.Margin = new Vector4(0, 0, 0, 10);
       AddChild(batteryStorageText);

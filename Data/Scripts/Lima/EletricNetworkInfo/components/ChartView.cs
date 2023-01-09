@@ -71,7 +71,7 @@ namespace Lima
       var color = App.Theme.MainColor;
 
       _chartView.BorderColor = bgColor;
-      _chartView.Border = new Vector4(1);
+      _chartView.Border = new Vector4(2);
       _legendsView.BgColor = bgColor;
 
       foreach (var leg in _legends)
@@ -168,27 +168,24 @@ namespace Lima
       chartWrapper.AddChild(_chart);
 
       _legendsView = new FancyView(ViewDirection.Row);
-      _legendsView.Padding = new Vector4(8, 2, 4, 2);
+      _legendsView.Alignment = ViewAlignment.Center;
+      _legendsView.Padding = new Vector4(8, 0, 4, 0);
       _legendsView.Scale = new Vector2(1, 0);
       _legendsView.Pixels = new Vector2(0, 20);
       AddChild(_legendsView);
 
       _legends = new LegendItem[4];
       _legends[0] = new LegendItem("Consumption", DefaultColors[3]);
-      _legends[0].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[0]);
       _legends[1] = new LegendItem("Max Consum.", DefaultColors[2]);
-      _legends[1].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[1]);
       _legends[2] = new LegendItem("Production", DefaultColors[1]);
-      _legends[2].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[2]);
       _legends[3] = new LegendItem("Capacity", DefaultColors[0]);
-      _legends[3].Margin = Vector4.UnitY * 2;
       _legendsView.AddChild(_legends[3]);
 
       var checkboxLabel = new FancyLabel("Battery", 0.4f, TextAlignment.RIGHT);
-      checkboxLabel.Margin = new Vector4(0, 2, 4, 0);
+      checkboxLabel.Margin = new Vector4(0, 0, 4, 0);
       checkboxLabel.Scale = new Vector2(0.5f, 0);
       _legendsView.AddChild(checkboxLabel);
       _batteryCheckbox = new FancyCheckbox((bool v) =>

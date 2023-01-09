@@ -31,10 +31,10 @@ namespace Lima
     private void CreateElements()
     {
       Gap = 4;
+      Alignment = ViewAlignment.Center;
 
       _square = new FancyView();
       _square.BgColor = _color;
-      _square.Margin = Vector4.UnitY * 2;
       _square.Pixels = new Vector2(8, 8);
       _square.Scale = new Vector2(0, 0);
       AddChild(_square);

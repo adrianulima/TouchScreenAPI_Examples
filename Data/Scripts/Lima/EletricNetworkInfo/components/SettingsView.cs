@@ -47,7 +47,7 @@ namespace Lima
 
       _containerView = new FancyView(ViewDirection.Row);
       _containerView.BorderColor = App.Theme.GetMainColorDarker(2);
-      _containerView.Border = new Vector4(1);
+      _containerView.Border = new Vector4(2);
       _containerView.Padding = new Vector4(4);
       _containerView.Pixels = new Vector2(0, 48 * 4);
       _containerView.Scale = new Vector2(1, 0);

@@ -148,7 +148,7 @@ namespace Lima
         var animInput = anim * InputRatio;
         _inputArrow.Enabled = true;
         _inputArrow.SpriteSize = new Vector2(20, 12) * scale;
-        _inputArrow.Position = iconPos + new Vector2(size.X / 2 - scale * (_inputArrow.SpriteSize.X / 2), animInput * -(_icon.SpriteSize.Y));
+        _inputArrow.Position = iconPos + new Vector2(size.X / 2 - (_inputArrow.SpriteSize.X / 2), animInput * -(_icon.SpriteSize.Y));
         _inputArrow.SpriteColor = new Color(mainColor, animInput * 1f);
       }
       else
@@ -159,7 +159,7 @@ namespace Lima
         var animOutput = anim * OutputRatio;
         _outputArrow.Enabled = true;
         _outputArrow.SpriteSize = new Vector2(20, 12) * scale;
-        _outputArrow.Position = iconPos + new Vector2(size.X / 2 - scale * (_inputArrow.SpriteSize.X / 2), animOutput * (_icon.SpriteSize.Y));
+        _outputArrow.Position = iconPos + new Vector2(size.X / 2 - (_inputArrow.SpriteSize.X / 2), animOutput * (_icon.SpriteSize.Y));
         _outputArrow.SpriteColor = new Color(mainColor, animOutput * 1f);
       }
       else
