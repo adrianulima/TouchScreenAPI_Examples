@@ -84,11 +84,17 @@ namespace Lima
         foreach (var manager in _electricManagers)
           if (manager.RemoveBlockAndCount(lcdBlock))
           {
-            manager.Dispose();
-            _electricManagers.Remove(manager);
+            RemoveManager(manager);
             return;
           }
       }
+    }
+
+    public void RemoveManager(ElectricNetworkManager manager)
+    {
+      manager.Dispose();
+      if (_electricManagers != null)
+        _electricManagers.Remove(manager);
     }
 
     protected override void UnloadData()

@@ -32,7 +32,7 @@ namespace Lima
         Data = SpriteImage,
         RotationOrScale = SpriteRotation,
         Color = SpriteColor ?? App.Theme.WhiteColor,
-        Size = SpriteSize * App.Theme.Scale,
+        Size = SpriteSize,
         Position = Position
       };
 

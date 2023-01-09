@@ -9,6 +9,7 @@ using Sandbox.Game.EntityComponents;
 using VRage;
 using SpaceEngineers.Game.ModAPI;
 using ProtoBuf;
+using VRage.Utils;
 
 namespace Lima
 {
@@ -171,30 +172,63 @@ namespace Lima
 
     private void OnConnectGrid(MyCubeGrid grid, GridLinkTypeEnum linkType)
     {
-      if (linkType == GridLinkTypeEnum.Electrical)
+      try
       {
-        Clear();
-        HandleGrid(_lcdBlocks[0].CubeGrid);
+        if (linkType == GridLinkTypeEnum.Electrical)
+        {
+          Clear();
+          HandleGrid(_lcdBlocks[0].CubeGrid);
+        }
+      }
+      catch (Exception e)
+      {
+        GameSession.Instance.RemoveManager(this);
+        MyLog.Default.WriteLineAndConsole($"{e.Message}\n{e.StackTrace}");
+
+        if (MyAPIGateway.Session?.Player != null)
+          MyAPIGateway.Utilities.ShowNotification($"[ ERROR: {GetType().FullName}: {e.Message} ]", 5000, MyFontEnum.Red);
       }
     }
 
     private void OnBlockAddedToGrid(IMySlimBlock slimBlock)
     {
-      MyCubeBlock block = slimBlock.FatBlock as MyCubeBlock;
-      if (block == null)
-        return;
-      HandleBlock(block);
+      try
+      {
+        MyCubeBlock block = slimBlock.FatBlock as MyCubeBlock;
+        if (block == null)
+          return;
+        HandleBlock(block);
+      }
+      catch (Exception e)
+      {
+        GameSession.Instance.RemoveManager(this);
+        MyLog.Default.WriteLineAndConsole($"{e.Message}\n{e.StackTrace}");
+
+        if (MyAPIGateway.Session?.Player != null)
+          MyAPIGateway.Utilities.ShowNotification($"[ ERROR: {GetType().FullName}: {e.Message} ]", 5000, MyFontEnum.Red);
+      }
     }
 
     private void OnBlockRemovedFromGrid(IMySlimBlock slimBlock)
     {
-      MyCubeBlock block = slimBlock.FatBlock as MyCubeBlock;
-      if (block == null)
-        return;
+      try
+      {
+        MyCubeBlock block = slimBlock.FatBlock as MyCubeBlock;
+        if (block == null)
+          return;
 
-      _inputList.Remove(block);
-      _outputList.Remove(block);
-      _thrustersList.Remove(block);
+        _inputList.Remove(block);
+        _outputList.Remove(block);
+        _thrustersList.Remove(block);
+      }
+      catch (Exception e)
+      {
+        GameSession.Instance.RemoveManager(this);
+        MyLog.Default.WriteLineAndConsole($"{e.Message}\n{e.StackTrace}");
+
+        if (MyAPIGateway.Session?.Player != null)
+          MyAPIGateway.Utilities.ShowNotification($"[ ERROR: {GetType().FullName}: {e.Message} ]", 5000, MyFontEnum.Red);
+      }
     }
 
     public bool AddBlockIfSameGrid(IMyCubeBlock lcdBlock)

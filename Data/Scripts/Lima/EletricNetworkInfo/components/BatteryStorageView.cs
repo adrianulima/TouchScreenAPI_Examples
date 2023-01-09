@@ -131,7 +131,7 @@ namespace Lima
       var mainColor = App.Theme.MainColor;
 
       _timeLeftView.Position = pos - new Vector2(size.X / 2, 0);
-      _timeLeftView.Pixels = new Vector2(size.X, 14);
+      _timeLeftView.Pixels = new Vector2(size.X / scale, 14);
 
       var iconPos = pos + new Vector2(0, size.Y / 2);
       _icon.Position = iconPos;

@@ -84,7 +84,7 @@ namespace Lima
     private void UpdateChartLines()
     {
       var size = _chart.GetSize();
-      var linesH = (int)Math.Floor(size.Y / 24);
+      var linesH = (int)Math.Floor(size.Y / (24 * App.Theme.Scale));
       _chart.GridHorizontalLines = linesH;
       var linesV = (int)Math.Floor(size.X / (size.Y / linesH));
       _chart.GridVerticalLines = linesV - 2;

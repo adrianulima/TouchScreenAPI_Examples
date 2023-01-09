@@ -94,8 +94,8 @@ namespace Lima
         Data = "Textures\\FactionLogo\\Builders\\BuilderIcon_7.dds",
         // Data = "Textures\\FactionLogo\\Others\\OtherIcon_22.dds",
         RotationOrScale = 0,
-        Position = GearIcon.Position + new Vector2(0, 8),
-        Size = new Vector2(16, 16),
+        Position = GearIcon.Position + new Vector2(0, 8) * App.Theme.Scale,
+        Size = new Vector2(16, 16) * App.Theme.Scale,
         Color = color
       };
 
@@ -117,20 +117,20 @@ namespace Lima
       {
         default:
         case 0:
-          square.Position = LayoutIcon.Position + new Vector2(1, 8 - 3);
-          square.Size = new Vector2(14, 7);
+          square.Position = LayoutIcon.Position + new Vector2(1, 8 - 3) * App.Theme.Scale;
+          square.Size = new Vector2(14, 7) * App.Theme.Scale;
           break;
         case 1:
-          square.Position = LayoutIcon.Position + new Vector2(1, 8);
-          square.Size = new Vector2(7, 14);
+          square.Position = LayoutIcon.Position + new Vector2(1, 8) * App.Theme.Scale;
+          square.Size = new Vector2(7, 14) * App.Theme.Scale;
           break;
         case 2:
-          square.Position = LayoutIcon.Position + new Vector2(1, 8);
-          square.Size = new Vector2(14, 14);
+          square.Position = LayoutIcon.Position + new Vector2(1, 8) * App.Theme.Scale;
+          square.Size = new Vector2(14, 14) * App.Theme.Scale;
           break;
         case 3:
-          square.Position = LayoutIcon.Position + new Vector2(1, 8);
-          square.Size = new Vector2(14, 14);
+          square.Position = LayoutIcon.Position + new Vector2(1, 8) * App.Theme.Scale;
+          square.Size = new Vector2(14, 14) * App.Theme.Scale;
           square.Color = new Color(App.Theme.GetMainColorDarker(2), 0.5f);
           break;
       }
