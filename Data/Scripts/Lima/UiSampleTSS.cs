@@ -10,8 +10,8 @@ using VRageMath;
 
 namespace Lima
 {
-  [MyTextSurfaceScript("FancyUI_Sample", "FancyUI Sample")]
-  public class FancySampleTSS : MyTSSCommon
+  [MyTextSurfaceScript("TouchUI_Sample", "TouchUI Sample")]
+  public class UiSampleTSS : MyTSSCommon
   {
     public override ScriptUpdate NeedsUpdate => ScriptUpdate.Update10;
 
@@ -24,7 +24,7 @@ namespace Lima
     bool _init = false;
     int ticks = 0;
 
-    public FancySampleTSS(IMyTextSurface surface, IMyCubeBlock block, Vector2 size) : base(surface, block, size)
+    public UiSampleTSS(IMyTextSurface surface, IMyCubeBlock block, Vector2 size) : base(surface, block, size)
     {
       _block = block;
       _surface = surface;
@@ -48,7 +48,7 @@ namespace Lima
       _app.CreateElements();
       _app.Theme.Scale = Math.Min(Math.Max(this.Surface.SurfaceSize.Y / 256, 0.4f), 1);
 
-      // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"Init: {_app}", "FancySampleTSS");
+      // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"Init: {_app}", "TouchSampleTSS");
 
       _terminalBlock.OnMarkForClose += BlockMarkedForClose;
     }

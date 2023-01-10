@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Lima
 {
-  public class EntitiesPanel : FancyView
+  public class EntitiesPanel : TouchView
   {
     public EntitiesPanel()
     {

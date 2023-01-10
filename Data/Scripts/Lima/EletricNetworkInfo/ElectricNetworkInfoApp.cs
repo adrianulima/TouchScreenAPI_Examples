@@ -5,11 +5,11 @@ using System;
 
 namespace Lima
 {
-  public class ElectricNetworkInfoApp : FancyApp
+  public class ElectricNetworkInfoApp : TouchApp
   {
     private ElectricNetworkManager _electricMan;
 
-    public FancyView MainView;
+    public TouchView MainView;
     public WindowButtons WindowBarButtons;
     public OverviewPanel OverviewPanel;
     public EntitiesPanel EntitiesPanel;
@@ -31,13 +31,13 @@ namespace Lima
 
     public void CreateElements()
     {
-      var windowBar = new FancyWindowBar("Electric Network Info");
+      var windowBar = new TouchWindowBar("Electric Network Info");
       AddChild(windowBar);
 
       WindowBarButtons = new WindowButtons(OnChangeConfig, OnChangePage);
       windowBar.AddChild(WindowBarButtons);
 
-      MainView = new FancyView();
+      MainView = new TouchView();
       AddChild(MainView);
 
       OverviewPanel = new OverviewPanel(OnChangeConfig);

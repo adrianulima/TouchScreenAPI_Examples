@@ -5,13 +5,13 @@ using VRageMath;
 
 namespace Lima
 {
-  public class WindowButtons : FancyView
+  public class WindowButtons : TouchView
   {
-    public FancyButton HelpBt;
-    public FancyEmptyButton SettingsButton;
-    public FancyEmptyButton LayoutButton;
-    public FancyEmptyElement GearIcon;
-    public FancyEmptyElement LayoutIcon;
+    public TouchButton HelpBt;
+    public TouchEmptyButton SettingsButton;
+    public TouchEmptyButton LayoutButton;
+    public TouchEmptyElement GearIcon;
+    public TouchEmptyElement LayoutIcon;
 
     public int CurrentLayout = 0;
 
@@ -29,26 +29,26 @@ namespace Lima
       Margin = new Vector4(4, 0, 4, 0);
       Gap = 4;
 
-      HelpBt = new FancyButton("?", OnClickHelp);
+      HelpBt = new TouchButton("?", OnClickHelp);
       HelpBt.Label.FontSize = 0.5f;
       HelpBt.Scale = Vector2.Zero;
       HelpBt.Pixels = new Vector2(16);
       AddChild(HelpBt);
 
-      SettingsButton = new FancyEmptyButton(OnClickSettings);
+      SettingsButton = new TouchEmptyButton(OnClickSettings);
       SettingsButton.Scale = Vector2.Zero;
       SettingsButton.Pixels = new Vector2(16);
       AddChild(SettingsButton);
 
-      GearIcon = new FancyEmptyElement();
+      GearIcon = new TouchEmptyElement();
       SettingsButton.AddChild(GearIcon);
 
-      LayoutButton = new FancyEmptyButton(OnClickLayout);
+      LayoutButton = new TouchEmptyButton(OnClickLayout);
       LayoutButton.Scale = Vector2.Zero;
       LayoutButton.Pixels = new Vector2(16);
       AddChild(LayoutButton);
 
-      LayoutIcon = new FancyEmptyElement();
+      LayoutIcon = new TouchEmptyElement();
       LayoutButton.AddChild(LayoutIcon);
 
       RegisterUpdate(Update);

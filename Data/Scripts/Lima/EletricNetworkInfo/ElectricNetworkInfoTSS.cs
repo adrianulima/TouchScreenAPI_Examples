@@ -10,7 +10,7 @@ using VRageMath;
 
 namespace Lima
 {
-  [MyTextSurfaceScript("FancyUI_ElectricNetworkInfo", "Electric Network Info")]
+  [MyTextSurfaceScript("TouchUI_ElectricNetworkInfo", "Electric Network Info")]
   public class ElectricNetworkInfoTSS : MyTSSCommon
   {
     public override ScriptUpdate NeedsUpdate => ScriptUpdate.Update10;

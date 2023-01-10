@@ -10,7 +10,7 @@ namespace Lima
   [MySessionComponentDescriptor(MyUpdateOrder.AfterSimulation)]
   public class GameSession : MySessionComponentBase
   {
-    public TouchScreenAPI Api { get; private set; }
+    public TouchUiKit Api { get; private set; }
     public static GameSession Instance;
 
     private List<ElectricNetworkManager> _electricManagers;
@@ -40,7 +40,7 @@ namespace Lima
 
       // Only for clients
       Instance = this;
-      Api = new TouchScreenAPI();
+      Api = new TouchUiKit();
       Api.Load();
     }
 

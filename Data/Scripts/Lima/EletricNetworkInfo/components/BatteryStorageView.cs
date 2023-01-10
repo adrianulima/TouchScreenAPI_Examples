@@ -5,7 +5,7 @@ using VRage.Game.GUI.TextPanel;
 
 namespace Lima
 {
-  public class BatteryStorageView : FancyView
+  public class BatteryStorageView : TouchView
   {
     public float Value;
     public float MaxValue;
@@ -13,15 +13,15 @@ namespace Lima
     public float InputRatio;
     public float OutputRatio;
 
-    private FancyProgressBar _progressBar;
+    private TouchProgressBar _progressBar;
     private Icon _icon;
 
     private Icon _inputArrow;
     private Icon _outputArrow;
-    private FancyView _overloadView;
-    private FancyLabel _overloadLabel;
-    private FancyView _timeLeftView;
-    private FancyLabel _timeLeftLabel;
+    private TouchView _overloadView;
+    private TouchLabel _overloadLabel;
+    private TouchView _timeLeftView;
+    private TouchLabel _timeLeftLabel;
 
     private bool _isOverloadBlackout = false;
     public float HoursLeft = 0;
@@ -70,7 +70,7 @@ namespace Lima
 
     private void CreateElements()
     {
-      _progressBar = new FancyProgressBar(0, MaxValue, true);
+      _progressBar = new TouchProgressBar(0, MaxValue, true);
       _progressBar.Pixels = new Vector2(_width, 0);
       _progressBar.Scale = new Vector2(0, 1);
       _progressBar.Label.FontSize = 0.6f;
@@ -91,24 +91,24 @@ namespace Lima
       _outputArrow.Enabled = false;
       AddChild(_outputArrow);
 
-      _overloadView = new FancyView();
+      _overloadView = new TouchView();
       _overloadView.BgColor = Color.Red;
       _overloadView.Padding = Vector4.UnitY * 1;
       _overloadView.Pixels = new Vector2(0, 12);
       _overloadView.Scale = new Vector2(1, 0);
       AddChild(_overloadView);
 
-      _overloadLabel = new FancyLabel("OVERLOAD", 0.35f, TextAlignment.CENTER);
+      _overloadLabel = new TouchLabel("OVERLOAD", 0.35f, TextAlignment.CENTER);
       _overloadView.AddChild(_overloadLabel);
 
-      _timeLeftView = new FancyView();
+      _timeLeftView = new TouchView();
       _timeLeftView.Padding = Vector4.UnitY * 1;
       _timeLeftView.Pixels = new Vector2(0, 14);
       // _timeLeftView.SetScale(new Vector2(1, 0));
       _timeLeftView.Absolute = true;
       AddChild(_timeLeftView);
 
-      _timeLeftLabel = new FancyLabel("00.0h", 0.4f, TextAlignment.CENTER);
+      _timeLeftLabel = new TouchLabel("00.0h", 0.4f, TextAlignment.CENTER);
       _timeLeftView.AddChild(_timeLeftLabel);
     }
 

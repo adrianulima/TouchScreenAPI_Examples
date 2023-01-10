@@ -6,12 +6,12 @@ using VRage.Game.GUI.TextPanel;
 
 namespace Lima
 {
-  public class EntityListView : FancyView
+  public class EntityListView : TouchView
   {
     private int _odd = 0;
 
-    private FancyScrollView _scrollView;
-    private List<FancyView> _views = new List<FancyView>();
+    private TouchScrollView _scrollView;
+    private List<TouchView> _views = new List<TouchView>();
 
     public string Title;
     private int _cols;
@@ -31,11 +31,11 @@ namespace Lima
 
     private void CreateElements()
     {
-      var titleLabel = new FancyLabel(Title, 0.4f, TextAlignment.LEFT);
+      var titleLabel = new TouchLabel(Title, 0.4f, TextAlignment.LEFT);
       titleLabel.Alignment = TextAlignment.CENTER;
       AddChild(titleLabel);
 
-      _scrollView = new FancyScrollView(ViewDirection.Column);
+      _scrollView = new TouchScrollView(ViewDirection.Column);
       _scrollView.Padding = new Vector4(2, 2, 2, 0);
       _scrollView.Gap = 2;
       AddChild(_scrollView);
@@ -64,11 +64,11 @@ namespace Lima
     {
       if (_views.Count == 0) return;
 
-      var view = _views.Last<FancyView>();
+      var view = _views.Last<TouchView>();
       var childCount = view.Children.Count;
       if (childCount < _cols)
       {
-        var fill = new FancyView();
+        var fill = new TouchView();
         view.AddChild(fill);
         fill.Scale = new Vector2(_cols - childCount, 0);
       }
@@ -78,12 +78,12 @@ namespace Lima
     {
       if (_odd % _cols != 0)
       {
-        var view = _views.Last<FancyView>();
+        var view = _views.Last<TouchView>();
         view.AddChild(item);
       }
       else
       {
-        var view = new FancyView(ViewDirection.Row);
+        var view = new TouchView(ViewDirection.Row);
         view.Gap = 2;
         view.AddChild(item);
         view.Scale = new Vector2(1, 0);
