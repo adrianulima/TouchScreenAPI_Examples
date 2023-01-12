@@ -46,7 +46,8 @@ namespace Lima
       _app = new SampleApp();
       _app.InitApp(this.Block as MyCubeBlock, this.Surface as IMyTextSurface);
       _app.CreateElements();
-      _app.Theme.Scale = Math.Min(Math.Max(this.Surface.SurfaceSize.Y / 256, 0.4f), 1);
+      _app.Theme.Scale = Math.Min(Math.Max(Math.Min(this.Surface.SurfaceSize.X, this.Surface.SurfaceSize.Y) / 512, 0.4f), 2);
+      _app.Cursor.Scale = _app.Theme.Scale;
 
       // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"Init: {_app}", "TouchSampleTSS");
 

@@ -101,7 +101,7 @@ namespace Lima
 
       button.Pixels = new Vector2(0, 42);
       button.Margin = Vector4.UnitY * 22;
-      button.Border = Vector4.UnitW * 12;
+      // button.Border = Vector4.UnitW * 12;
 
       var labelTextField = new TouchLabel("Text Field");
       labelTextField.Margin = Vector4.UnitY * 8;
