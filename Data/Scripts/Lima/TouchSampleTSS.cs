@@ -21,27 +21,12 @@ namespace Lima
     IMyTextSurface _surface;
 
     TouchScreen _screen;
-    FancyCursor _cursor;
+    Cursor _cursor;
 
     bool _custom = false;
     MySprite _customCursor;
     MySprite _square;
     ClickHandler _squareHandler;
-
-    MySprite _circle1;
-    MySprite _circle2;
-    MySprite _circle3;
-
-    int n = 60;
-    int n2 = 6;
-    MySprite[] _circle;
-    private int _rotation = 0;
-    private float _pitch = 0;
-
-    private float[] _lati;
-    private float[] _long;
-    private float _radius = 150;
-    private Vector2 _center = new Vector2(512 / 2, 512 / 2);
 
     bool _init = false;
     int ticks = 0;
@@ -58,15 +43,15 @@ namespace Lima
 
     public void Init()
     {
-      if (!GameSession.Instance.Api.IsReady)
+      if (!GameExampleSession.Instance.Api.IsReady)
         return;
 
       if (_init)
         return;
       _init = true;
 
-      _screen = new TouchScreen(GameSession.Instance.Api.CreateTouchScreen(_block, _surface));
-      _cursor = new FancyCursor(_screen);
+      _screen = new TouchScreen(GameExampleSession.Instance.Api.CreateTouchScreen(_block, _surface));
+      _cursor = new Cursor(_screen);
 
       _customCursor = new MySprite()
       {
@@ -80,73 +65,14 @@ namespace Lima
       _square = new MySprite()
       {
         Type = SpriteType.TEXTURE,
-        Data = "SquareSimple",
+        Data = "Circle",
         RotationOrScale = 0,
-        Color = Color.RoyalBlue,
-        Position = new Vector2(0, 25),
-        Size = new Vector2(50, 50)
+        Color = Surface.ScriptForegroundColor,
+        Position = new Vector2(0, 75),
+        Size = new Vector2(150, 150)
       };
       _squareHandler = new ClickHandler();
-      _squareHandler.HitArea = new Vector4(0, 0, 50, 50);
-
-
-      _circle1 = new MySprite()
-      {
-        Type = SpriteType.TEXTURE,
-        Data = "SemiCircle",
-        RotationOrScale = MathHelper.PiOver2 + MathHelper.PiOver4,
-        Color = new Color(Color.RoyalBlue * 0.6f, 1),
-        Position = new Vector2(512 / 2 - 300 / 2, 512 / 2),
-        Size = new Vector2(300, 300)
-      };
-
-      _circle2 = new MySprite()
-      {
-        Type = SpriteType.TEXTURE,
-        Data = "SemiCircle",
-        // RotationOrScale = -0.655f,
-        RotationOrScale = -MathHelper.PiOver2 + MathHelper.PiOver4,
-        Color = new Color(Color.RoyalBlue * 0.2f, 1),
-        Position = new Vector2(512 / 2 - 300 / 2, 512 / 2),
-        Size = new Vector2(300, 300)
-      };
-
-      _circle3 = new MySprite()
-      {
-        Type = SpriteType.TEXTURE,
-        Data = "Circle",
-        RotationOrScale = MathHelper.PiOver4,
-        Color = new Color(Color.RoyalBlue * 0.6f, 1),
-        Position = new Vector2(512 / 2 - 35, 512 / 2),
-        Size = new Vector2(70, 300)
-      };
-
-
-      _lati = new float[n];
-      _long = new float[n];
-      _circle = new MySprite[n];
-
-      var div = (n / n2);
-      var pi_lat = (float)Math.PI / (div + 1);
-      var pi_long = (float)Math.PI / n2;
-
-      for (int i = 0; i < div; i++)
-      {
-        for (int j = 0; j < n2; j++)
-        {
-          _lati[i * n2 + j] = i * pi_lat + pi_lat / 2;
-          _long[i * n2 + j] = j * pi_long * 2;
-          _circle[i * n2 + j] = new MySprite()
-          {
-            Type = SpriteType.TEXTURE,
-            Data = "Circle",
-            RotationOrScale = 0,
-            Color = Color.DarkBlue,
-            Position = new Vector2(256, 256),
-            Size = new Vector2(10, 10)
-          };
-        }
-      }
+      _squareHandler.HitArea = new Vector4(0, 0, 150, 150);
 
       _terminalBlock.OnMarkForClose += BlockMarkedForClose;
     }
@@ -155,7 +81,7 @@ namespace Lima
     {
       base.Dispose();
 
-      GameSession.Instance.Api.RemoveTouchScreen(_block, _surface);
+      GameExampleSession.Instance.Api.RemoveTouchScreen(_block, _surface);
       _screen?.ForceDispose();
       _cursor?.ForceDispose();
       _terminalBlock.OnMarkForClose -= BlockMarkedForClose;
@@ -168,80 +94,27 @@ namespace Lima
 
     private void UpdateSprites()
     {
-      _squareHandler.UpdateStatus(_screen);
+      _squareHandler.Update(_screen);
 
-      if (_squareHandler.IsMousePressed)
+      if (_squareHandler.Mouse1.IsPressed)
       {
         _square.Color = Color.White;
         _custom = !_custom;
       }
-      else if (_squareHandler.IsMouseOver)
+      else if (_squareHandler.Mouse1.IsOver)
         _square.Color = Color.BlueViolet;
       else
         _square.Color = Color.RoyalBlue;
 
       if (_custom)
         _customCursor.Position = _screen.CursorPosition;
+    }
 
-      _rotation += 5;
-      if (_rotation >= 360)
-        _rotation = 0;
-
-      // var moveY = (_cursor.GetPosition().Y / 512) * Math.PI;
-      // var radi_rotation = (_cursor.GetPosition().X / 512) * Math.PI;
-
-      var radi_rotation = _rotation * (Math.PI / 180);
-
-      for (int i = 0; i < n; i++)
-      {
-        var z = _radius * Math.Sin(_lati[i]) * Math.Cos(_long[i] + radi_rotation);
-        var x = _radius * Math.Sin(_lati[i]) * Math.Sin(_long[i] + radi_rotation);
-        var y = _radius * Math.Cos(_lati[i]);
-
-
-        var sz = (float)(-z / _radius);
-        // y -= sz * 30;
-
-        var size = new Vector2(2, 2) + new Vector2(3, 3) * sz;
-        _circle[i].Size = size;
-        _circle[i].Position = _center + new Vector2((float)x, -(float)y);
-        _circle[i].Position -= Vector2.UnitX * (size.X / 2);
-
-        _circle[i].RotationOrScale = sz > 0 ? 1 : -1;
-      }
-
-
-      //
-      if (_rotation <= 180)
-      {
-        _circle1.Color = new Color(Color.RoyalBlue * 0.2f, 1);
-        _circle2.Color = new Color(Color.RoyalBlue * 0.6f, 1);
-      }
-      else
-      {
-        _circle1.Color = new Color(Color.RoyalBlue * 0.6f, 1);
-        _circle2.Color = new Color(Color.RoyalBlue * 0.2f, 1);
-      }
-
-      if (_rotation > 90 && _rotation <= 270)
-        _circle3.Color = new Color(Color.RoyalBlue * 0.2f, 1);
-      else
-        _circle3.Color = new Color(Color.RoyalBlue * 0.6f, 1);
-
-      var rot = ((90 - (_rotation % 90f)) / 90f);
-      if ((_rotation >= 90 && _rotation < 180) || _rotation >= 270)
-        rot = 1 - rot;
-
-      var sx = rot * 300f;
-      _circle3.Size = new Vector2(sx == 0 ? Math.Sign(sx) : sx, 300);
-      _circle3.Position = new Vector2(512 / 2 - sx / 2, 512 / 2);
-
-      // _pitch = ((_rotation - 180f) / 180f) * MathHelper.Pi;
-      _circle1.RotationOrScale = MathHelper.PiOver2 + _pitch;
-      _circle2.RotationOrScale = -MathHelper.PiOver2 + _pitch;
-      _circle3.RotationOrScale = _pitch;
-
-      // Sandbox.Game.MyVisualScriptLogicProvider.SendChatMessage($"{_rotation}", "SampleApp");
+    int ClampAngle(int angle)
+    {
+      angle = angle % 360;
+      if (angle < 0) angle += 360;
+      return angle;
     }
 
     public override void Run()
@@ -263,21 +136,11 @@ namespace Lima
         using (var frame = m_surface.DrawFrame())
         {
           frame.Add(_square);
-          frame.Add(_circle1);
-          frame.Add(_circle2);
-          frame.Add(_circle3);
-
-          // for (int i = 0; i < n; i++)
-          // {
-          //   if (_circle[i].RotationOrScale >= 0)
-          //     frame.Add(_circle[i]);
-          // }
 
           if (_custom)
             frame.Add(_customCursor);
           else
-            frame.AddRange(_cursor.Sprites);
-          frame.Dispose();
+            frame.AddRange(_cursor.GetSprites());
         }
       }
       catch (Exception e)

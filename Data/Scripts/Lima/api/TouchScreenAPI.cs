@@ -1,10 +1,13 @@
-using Sandbox.ModAPI;
+
 using System.Collections.Generic;
 using System;
 using VRage.Game.GUI.TextPanel;
-using VRage.Game.ModAPI;
 using VRage.Utils;
 using VRageMath;
+using MyAPIGateway = Sandbox.ModAPI.MyAPIGateway;
+using IngameIMyTextSurface = Sandbox.ModAPI.Ingame.IMyTextSurface;
+using IngameIMyCubeBlock = VRage.Game.ModAPI.Ingame.IMyCubeBlock;
+using IngameIMyBlockGroup = Sandbox.ModAPI.Ingame.IMyBlockGroup;
 
 namespace Lima.API
 {
@@ -20,17 +23,17 @@ namespace Lima.API
     private bool _isInitiated;
     private bool _isRegistered;
 
-    private Func<IMyCubeBlock, IMyTextSurface, object> _createTouchScreen;
-    private Action<IMyCubeBlock, IMyTextSurface> _removeTouchScreen;
-    private Func<float> _getMaxInteractiveDistance;
-    private Action<float> _setMaxInteractiveDistance;
-    private Action<string> _addSurfaceCoords;
-    private Action<string> _removeSurfaceCoords;
-
     /// <summary>
     /// Wheter the API is ready to be used. True after <see cref="Load"/> is called.
     /// </summary>
     public bool IsReady { get; protected set; }
+
+    private Func<IngameIMyCubeBlock, IngameIMyTextSurface, object> _createTouchScreen;
+    private Action<IngameIMyCubeBlock, IngameIMyTextSurface> _removeTouchScreen;
+    private Action<string> _addSurfaceCoords;
+    private Action<string> _removeSurfaceCoords;
+    private Func<IngameIMyCubeBlock, string> _getBlockIconSprite;
+    private Func<IngameIMyBlockGroup, string> _getBlockGroupIconSprite;
 
     /// <summary>
     /// Creates an instance of TouchScreen add adds it to the Touch Manager.
@@ -41,13 +44,13 @@ namespace Lima.API
     /// <param name="block">The block the touch point will be calculated.</param>
     /// <param name="surface">The surface the user will handle touch.</param>
     /// <returns></returns>
-    public object CreateTouchScreen(IMyCubeBlock block, IMyTextSurface surface) => _createTouchScreen?.Invoke(block, surface);
+    public object CreateTouchScreen(IngameIMyCubeBlock block, IngameIMyTextSurface surface) => _createTouchScreen?.Invoke(block, surface);
     /// <summary>
     /// Dispose the instance of TouchScreen related to given block and surface. And also removes from Touch Manager.
     /// </summary>
     /// <param name="block">The related block.</param>
     /// <param name="surface">The related surface.</param>
-    public void RemoveTouchScreen(IMyCubeBlock block, IMyTextSurface surface) => _removeTouchScreen?.Invoke(block, surface);
+    public void RemoveTouchScreen(IngameIMyCubeBlock block, IngameIMyTextSurface surface) => _removeTouchScreen?.Invoke(block, surface);
     /// <summary>
     /// This add surface coordinates to Touch Manager, it is a string similar to how GPS strings work.
     /// This same feature is also available using chat message commands with prefix /touch [string].
@@ -67,13 +70,12 @@ namespace Lima.API
     /// </summary>
     /// <param name="coords"></param>
     public void RemoveSurfaceCoords(string coords) => _removeSurfaceCoords?.Invoke(coords);
-    /// <returns>Current Touch Manager max interactive distance from player to screen.</returns>
-    public float GetMaxInteractiveDistance() => _getMaxInteractiveDistance?.Invoke() ?? -1f;
     /// <summary>
-    /// Sets Touch Manager max interactive distance from player to screen.
+    /// Gets the icon from block definition and set as LCD sprite definition.
     /// </summary>
-    /// <param name="distance">Distance in game meters.</param>
-    public void SetMaxInteractiveDistance(float distance) => _setMaxInteractiveDistance?.Invoke(distance);
+    /// <param name="block"></param>
+    public string GetBlockIconSprite(IngameIMyCubeBlock block) => _getBlockIconSprite?.Invoke(block);
+    public string GetBlockGroupIconSprite(IngameIMyBlockGroup blockGroup) => _getBlockGroupIconSprite?.Invoke(blockGroup);
 
     protected virtual string GetRequestString() { return "ApiRequestTouch"; }
 
@@ -147,36 +149,44 @@ namespace Lima.API
       AssignMethod(delegates, "RemoveTouchScreen", ref _removeTouchScreen);
       AssignMethod(delegates, "AddSurfaceCoords", ref _addSurfaceCoords);
       AssignMethod(delegates, "RemoveSurfaceCoords", ref _removeSurfaceCoords);
-      AssignMethod(delegates, "GetMaxInteractiveDistance", ref _getMaxInteractiveDistance);
-      AssignMethod(delegates, "SetMaxInteractiveDistance", ref _setMaxInteractiveDistance);
+      AssignMethod(delegates, "GetBlockIconSprite", ref _getBlockIconSprite);
+      AssignMethod(delegates, "GetBlockGroupIconSprite", ref _getBlockGroupIconSprite);
       AssignMethod(delegates, "TouchScreen_GetBlock", ref ApiDelegator.TouchScreen_GetBlock);
       AssignMethod(delegates, "TouchScreen_GetSurface", ref ApiDelegator.TouchScreen_GetSurface);
       AssignMethod(delegates, "TouchScreen_GetIndex", ref ApiDelegator.TouchScreen_GetIndex);
       AssignMethod(delegates, "TouchScreen_IsOnScreen", ref ApiDelegator.TouchScreen_IsOnScreen);
+      AssignMethod(delegates, "TouchScreen_GetMouse1", ref ApiDelegator.TouchScreen_GetMouse1);
+      AssignMethod(delegates, "TouchScreen_GetMouse2", ref ApiDelegator.TouchScreen_GetMouse2);
+      AssignMethod(delegates, "TouchScreen_GetMouse3", ref ApiDelegator.TouchScreen_GetMouse3);
       AssignMethod(delegates, "TouchScreen_GetCursorPosition", ref ApiDelegator.TouchScreen_GetCursorPosition);
       AssignMethod(delegates, "TouchScreen_GetInteractiveDistance", ref ApiDelegator.TouchScreen_GetInteractiveDistance);
       AssignMethod(delegates, "TouchScreen_SetInteractiveDistance", ref ApiDelegator.TouchScreen_SetInteractiveDistance);
       AssignMethod(delegates, "TouchScreen_GetRotation", ref ApiDelegator.TouchScreen_GetRotation);
       AssignMethod(delegates, "TouchScreen_CompareWithBlockAndSurface", ref ApiDelegator.TouchScreen_CompareWithBlockAndSurface);
       AssignMethod(delegates, "TouchScreen_ForceDispose", ref ApiDelegator.TouchScreen_ForceDispose);
-      AssignMethod(delegates, "TouchCursor_New", ref ApiDelegator.TouchCursor_New);
-      AssignMethod(delegates, "TouchCursor_GetActive", ref ApiDelegator.TouchCursor_GetActive);
-      AssignMethod(delegates, "TouchCursor_SetActive", ref ApiDelegator.TouchCursor_SetActive);
-      AssignMethod(delegates, "TouchCursor_GetScale", ref ApiDelegator.TouchCursor_GetScale);
-      AssignMethod(delegates, "TouchCursor_SetScale", ref ApiDelegator.TouchCursor_SetScale);
-      AssignMethod(delegates, "TouchCursor_GetPosition", ref ApiDelegator.TouchCursor_GetPosition);
-      AssignMethod(delegates, "TouchCursor_IsInsideArea", ref ApiDelegator.TouchCursor_IsInsideArea);
-      AssignMethod(delegates, "TouchCursor_GetSprites", ref ApiDelegator.TouchCursor_GetSprites);
-      AssignMethod(delegates, "TouchCursor_ForceDispose", ref ApiDelegator.TouchCursor_ForceDispose);
+      AssignMethod(delegates, "Cursor_New", ref ApiDelegator.Cursor_New);
+      AssignMethod(delegates, "Cursor_GetEnabled", ref ApiDelegator.Cursor_GetEnabled);
+      AssignMethod(delegates, "Cursor_SetEnabled", ref ApiDelegator.Cursor_SetEnabled);
+      AssignMethod(delegates, "Cursor_GetScale", ref ApiDelegator.Cursor_GetScale);
+      AssignMethod(delegates, "Cursor_SetScale", ref ApiDelegator.Cursor_SetScale);
+      AssignMethod(delegates, "Cursor_GetPosition", ref ApiDelegator.Cursor_GetPosition);
+      AssignMethod(delegates, "Cursor_IsInsideArea", ref ApiDelegator.Cursor_IsInsideArea);
+      AssignMethod(delegates, "Cursor_GetSprites", ref ApiDelegator.Cursor_GetSprites);
+      AssignMethod(delegates, "Cursor_ForceDispose", ref ApiDelegator.Cursor_ForceDispose);
       AssignMethod(delegates, "ClickHandler_New", ref ApiDelegator.ClickHandler_New);
       AssignMethod(delegates, "ClickHandler_GetHitArea", ref ApiDelegator.ClickHandler_GetHitArea);
       AssignMethod(delegates, "ClickHandler_SetHitArea", ref ApiDelegator.ClickHandler_SetHitArea);
-      AssignMethod(delegates, "ClickHandler_IsMouseReleased", ref ApiDelegator.ClickHandler_IsMouseReleased);
-      AssignMethod(delegates, "ClickHandler_IsMouseOver", ref ApiDelegator.ClickHandler_IsMouseOver);
-      AssignMethod(delegates, "ClickHandler_IsMousePressed", ref ApiDelegator.ClickHandler_IsMousePressed);
-      AssignMethod(delegates, "ClickHandler_JustReleased", ref ApiDelegator.ClickHandler_JustReleased);
-      AssignMethod(delegates, "ClickHandler_JustPressed", ref ApiDelegator.ClickHandler_JustPressed);
-      AssignMethod(delegates, "ClickHandler_UpdateStatus", ref ApiDelegator.ClickHandler_UpdateStatus);
+      AssignMethod(delegates, "ClickHandler_Update", ref ApiDelegator.ClickHandler_Update);
+      AssignMethod(delegates, "ClickHandler_GetMouse1", ref ApiDelegator.ClickHandler_GetMouse1);
+      AssignMethod(delegates, "ClickHandler_GetMouse2", ref ApiDelegator.ClickHandler_GetMouse2);
+      AssignMethod(delegates, "ClickHandler_GetMouse3", ref ApiDelegator.ClickHandler_GetMouse3);
+      AssignMethod(delegates, "ButtonState_New", ref ApiDelegator.ButtonState_New);
+      AssignMethod(delegates, "ButtonState_IsReleased", ref ApiDelegator.ButtonState_IsReleased);
+      AssignMethod(delegates, "ButtonState_IsOver", ref ApiDelegator.ButtonState_IsOver);
+      AssignMethod(delegates, "ButtonState_IsPressed", ref ApiDelegator.ButtonState_IsPressed);
+      AssignMethod(delegates, "ButtonState_JustReleased", ref ApiDelegator.ButtonState_JustReleased);
+      AssignMethod(delegates, "ButtonState_JustPressed", ref ApiDelegator.ButtonState_JustPressed);
+      AssignMethod(delegates, "ButtonState_Update", ref ApiDelegator.ButtonState_Update);
     }
     protected void AssignMethod<T>(IReadOnlyDictionary<string, Delegate> delegates, string name, ref T field) where T : class
     {
@@ -199,36 +209,45 @@ namespace Lima.API
   /// </summary>
   public class TouchApiDelegator
   {
-    public Func<object, IMyCubeBlock> TouchScreen_GetBlock;
-    public Func<object, IMyTextSurface> TouchScreen_GetSurface;
+    public Func<object, IngameIMyCubeBlock> TouchScreen_GetBlock;
+    public Func<object, IngameIMyTextSurface> TouchScreen_GetSurface;
     public Func<object, int> TouchScreen_GetIndex;
     public Func<object, bool> TouchScreen_IsOnScreen;
+    public Func<object, object> TouchScreen_GetMouse1;
+    public Func<object, object> TouchScreen_GetMouse2;
+    public Func<object, object> TouchScreen_GetMouse3;
     public Func<object, Vector2> TouchScreen_GetCursorPosition;
     public Func<object, float> TouchScreen_GetInteractiveDistance;
     public Action<object, float> TouchScreen_SetInteractiveDistance;
     public Func<object, int> TouchScreen_GetRotation;
-    public Func<object, IMyCubeBlock, IMyTextSurface, bool> TouchScreen_CompareWithBlockAndSurface;
+    public Func<object, IngameIMyCubeBlock, IngameIMyTextSurface, bool> TouchScreen_CompareWithBlockAndSurface;
     public Action<object> TouchScreen_ForceDispose;
 
-    public Func<object, object> TouchCursor_New;
-    public Func<object, bool> TouchCursor_GetActive;
-    public Action<object, bool> TouchCursor_SetActive;
-    public Func<object, float> TouchCursor_GetScale;
-    public Action<object, float> TouchCursor_SetScale;
-    public Func<object, Vector2> TouchCursor_GetPosition;
-    public Func<object, float, float, float, float, bool> TouchCursor_IsInsideArea;
-    public Func<object, List<MySprite>> TouchCursor_GetSprites;
-    public Action<object> TouchCursor_ForceDispose;
+    public Func<object, object> Cursor_New;
+    public Func<object, bool> Cursor_GetEnabled;
+    public Action<object, bool> Cursor_SetEnabled;
+    public Func<object, float> Cursor_GetScale;
+    public Action<object, float> Cursor_SetScale;
+    public Func<object, Vector2> Cursor_GetPosition;
+    public Func<object, float, float, float, float, bool> Cursor_IsInsideArea;
+    public Func<object, List<MySprite>> Cursor_GetSprites;
+    public Action<object> Cursor_ForceDispose;
 
     public Func<object> ClickHandler_New;
     public Func<object, Vector4> ClickHandler_GetHitArea;
     public Action<object, Vector4> ClickHandler_SetHitArea;
-    public Func<object, bool> ClickHandler_IsMouseReleased;
-    public Func<object, bool> ClickHandler_IsMouseOver;
-    public Func<object, bool> ClickHandler_IsMousePressed;
-    public Func<object, bool> ClickHandler_JustReleased;
-    public Func<object, bool> ClickHandler_JustPressed;
-    public Action<object, object> ClickHandler_UpdateStatus;
+    public Action<object, object> ClickHandler_Update;
+    public Func<object, object> ClickHandler_GetMouse1;
+    public Func<object, object> ClickHandler_GetMouse2;
+    public Func<object, object> ClickHandler_GetMouse3;
+
+    public Func<object> ButtonState_New;
+    public Func<object, bool> ButtonState_IsReleased;
+    public Func<object, bool> ButtonState_IsOver;
+    public Func<object, bool> ButtonState_IsPressed;
+    public Func<object, bool> ButtonState_JustReleased;
+    public Func<object, bool> ButtonState_JustPressed;
+    public Action<object, bool, bool> ButtonState_Update;
   }
 
   /// <summary>
@@ -252,45 +271,50 @@ namespace Lima.API
   }
   /// <summary>
   /// TouchScreen is responsible for calculating screen direction and position from player.
-  /// Each <see cref="IMyTextSurface"/> on a <see cref="IMyCubeBlock"/> may have it.
+  /// Each <see cref="IngameIMyTextSurface"/> on a <see cref="IngameIMyTextSurface"/> may have it.
   /// <see href="https://github.com/adrianulima/TouchScreenAPI/blob/main/Data/Scripts/Lima/Touch/TouchScreen.cs"/>
   /// </summary>
   public class TouchScreen : WrapperBase<TouchApiDelegator>
   {
+    private ButtonState _mouse1;
+    private ButtonState _mouse2;
+    private ButtonState _mouse3;
     /// <summary>
     /// Do not call this ctor directly, unless you have the reference of the original object from the API.
     /// </summary>
     public TouchScreen(object internalObject) : base(internalObject) { }
-    public IMyCubeBlock Block { get { return Api.TouchScreen_GetBlock.Invoke(InternalObj); } }
-    public IMyTextSurface Surface { get { return Api.TouchScreen_GetSurface.Invoke(InternalObj); } }
+    public IngameIMyCubeBlock Block { get { return Api.TouchScreen_GetBlock.Invoke(InternalObj); } }
+    public IngameIMyTextSurface Surface { get { return Api.TouchScreen_GetSurface.Invoke(InternalObj); } }
     public int Index { get { return Api.TouchScreen_GetIndex.Invoke(InternalObj); } }
     public bool IsOnScreen { get { return Api.TouchScreen_IsOnScreen.Invoke(InternalObj); } }
+    public ButtonState Mouse1 { get { return _mouse1 ?? (_mouse1 = Wrap<ButtonState>(Api.TouchScreen_GetMouse1.Invoke(InternalObj), (obj) => new ButtonState(obj))); } }
+    public ButtonState Mouse2 { get { return _mouse2 ?? (_mouse2 = Wrap<ButtonState>(Api.TouchScreen_GetMouse2.Invoke(InternalObj), (obj) => new ButtonState(obj))); } }
+    public ButtonState Mouse3 { get { return _mouse3 ?? (_mouse3 = Wrap<ButtonState>(Api.TouchScreen_GetMouse3.Invoke(InternalObj), (obj) => new ButtonState(obj))); } }
     public Vector2 CursorPosition { get { return Api.TouchScreen_GetCursorPosition.Invoke(InternalObj); } }
-    public float InteractiveDistance { get { return Api.TouchScreen_GetInteractiveDistance.Invoke(InternalObj); } }
-    public void SetInteractiveDistance(float distance) => Api.TouchScreen_SetInteractiveDistance.Invoke(InternalObj, distance);
+    public float InteractiveDistance { get { return Api.TouchScreen_GetInteractiveDistance.Invoke(InternalObj); } set { Api.TouchScreen_SetInteractiveDistance.Invoke(InternalObj, value); } }
     public int Rotation { get { return Api.TouchScreen_GetRotation.Invoke(InternalObj); } }
-    public bool CompareWithBlockAndSurface(IMyCubeBlock block, IMyTextSurface surface) => Api.TouchScreen_CompareWithBlockAndSurface.Invoke(InternalObj, block, surface);
+    public bool CompareWithBlockAndSurface(IngameIMyCubeBlock block, IngameIMyTextSurface surface) => Api.TouchScreen_CompareWithBlockAndSurface.Invoke(InternalObj, block, surface);
     public void ForceDispose() => Api.TouchScreen_ForceDispose.Invoke(InternalObj);
   }
   /// <summary>
-  /// <see href="https://github.com/adrianulima/TouchScreenAPI/blob/main/Data/Scripts/Lima/Touch/TouchCursor.cs"/>
+  /// <see href="https://github.com/adrianulima/TouchScreenAPI/blob/main/Data/Scripts/Lima/Touch/Cursor.cs"/>
   /// </summary>
-  public class TouchCursor : WrapperBase<TouchApiDelegator>
+  public class Cursor : WrapperBase<TouchApiDelegator>
   {
-    public TouchCursor(TouchScreen screen) : base(Api.TouchCursor_New(screen.InternalObj)) { }
+    public Cursor(TouchScreen screen) : base(Api.Cursor_New(screen.InternalObj)) { }
     /// <summary>
     /// Do not call this ctor directly, unless you have the reference of the original object from the API.
     /// </summary>
-    public TouchCursor(object internalObject) : base(internalObject) { }
-    public bool Active { get { return Api.TouchCursor_GetActive.Invoke(InternalObj); } set { Api.TouchCursor_SetActive.Invoke(InternalObj, value); } }
-    public float Scale { get { return Api.TouchCursor_GetScale.Invoke(InternalObj); } set { Api.TouchCursor_SetScale.Invoke(InternalObj, value); } }
-    public Vector2 Position { get { return Api.TouchCursor_GetPosition.Invoke(InternalObj); } }
-    public bool IsInsideArea(float x, float y, float z, float w) => Api.TouchCursor_IsInsideArea.Invoke(InternalObj, x, y, z, w);
-    public List<MySprite> GetSprites() => Api.TouchCursor_GetSprites.Invoke(InternalObj);
+    public Cursor(object internalObject) : base(internalObject) { }
+    public bool Enabled { get { return Api.Cursor_GetEnabled.Invoke(InternalObj); } set { Api.Cursor_SetEnabled.Invoke(InternalObj, value); } }
+    public float Scale { get { return Api.Cursor_GetScale.Invoke(InternalObj); } set { Api.Cursor_SetScale.Invoke(InternalObj, value); } }
+    public Vector2 Position { get { return Api.Cursor_GetPosition.Invoke(InternalObj); } }
+    public bool IsInsideArea(float x, float y, float z, float w) => Api.Cursor_IsInsideArea.Invoke(InternalObj, x, y, z, w);
+    public List<MySprite> GetSprites() => Api.Cursor_GetSprites.Invoke(InternalObj);
     /// <summary>
     /// Force a call to Cursor Dispose, that clears sprites.
     /// </summary>
-    public void ForceDispose() => Api.TouchCursor_ForceDispose.Invoke(InternalObj);
+    public void ForceDispose() => Api.Cursor_ForceDispose.Invoke(InternalObj);
   }
   /// <summary>
   /// Responsible for handling and updating cursor states related to a area on a screen.
@@ -298,6 +322,9 @@ namespace Lima.API
   /// </summary>
   public class ClickHandler : WrapperBase<TouchApiDelegator>
   {
+    private ButtonState _mouse1;
+    private ButtonState _mouse2;
+    private ButtonState _mouse3;
     public ClickHandler() : base(Api.ClickHandler_New()) { }
     /// <summary>
     /// Do not call this ctor directly, unless you have the reference of the original object from the API.
@@ -307,14 +334,30 @@ namespace Lima.API
     /// A Vector4 representing the area on screen that should check for cursor position.
     /// </summary>
     public Vector4 HitArea { get { return Api.ClickHandler_GetHitArea.Invoke(InternalObj); } set { Api.ClickHandler_SetHitArea.Invoke(InternalObj, value); } }
-    public bool IsMouseReleased { get { return Api.ClickHandler_IsMouseReleased.Invoke(InternalObj); } }
-    public bool IsMouseOver { get { return Api.ClickHandler_IsMouseOver.Invoke(InternalObj); } }
-    public bool IsMousePressed { get { return Api.ClickHandler_IsMousePressed.Invoke(InternalObj); } }
-    public bool JustReleased { get { return Api.ClickHandler_JustReleased.Invoke(InternalObj); } }
-    public bool JustPressed { get { return Api.ClickHandler_JustPressed.Invoke(InternalObj); } }
     /// <summary>
     /// This is already called internally by the Touch Manager, only call this if you wanna override the handler status.
     /// </summary>
-    public void UpdateStatus(TouchScreen screen) => Api.ClickHandler_UpdateStatus.Invoke(InternalObj, screen.InternalObj);
+    public void Update(TouchScreen screen) => Api.ClickHandler_Update.Invoke(InternalObj, screen.InternalObj);
+    public ButtonState Mouse1 { get { return _mouse1 ?? (_mouse1 = Wrap<ButtonState>(Api.ClickHandler_GetMouse1.Invoke(InternalObj), (obj) => new ButtonState(obj))); } }
+    public ButtonState Mouse2 { get { return _mouse2 ?? (_mouse2 = Wrap<ButtonState>(Api.ClickHandler_GetMouse2.Invoke(InternalObj), (obj) => new ButtonState(obj))); } }
+    public ButtonState Mouse3 { get { return _mouse3 ?? (_mouse3 = Wrap<ButtonState>(Api.ClickHandler_GetMouse3.Invoke(InternalObj), (obj) => new ButtonState(obj))); } }
+  }
+  /// <summary>
+  /// Responsible for holding calculating and holding button state.
+  /// <see href="https://github.com/adrianulima/TouchScreenAPI/blob/main/Data/Scripts/Lima/Touch/ButtonState.cs"/>
+  /// </summary>
+  public class ButtonState : WrapperBase<TouchApiDelegator>
+  {
+    public ButtonState() : base(Api.ButtonState_New()) { }
+    /// <summary>
+    /// Do not call this ctor directly, unless you have the reference of the original object from the API.
+    /// </summary>
+    public ButtonState(object internalObject) : base(internalObject) { }
+    public bool IsReleased { get { return Api.ButtonState_IsReleased.Invoke(InternalObj); } }
+    public bool IsOver { get { return Api.ButtonState_IsOver.Invoke(InternalObj); } }
+    public bool IsPressed { get { return Api.ButtonState_IsPressed.Invoke(InternalObj); } }
+    public bool JustReleased { get { return Api.ButtonState_JustReleased.Invoke(InternalObj); } }
+    public bool JustPressed { get { return Api.ButtonState_JustPressed.Invoke(InternalObj); } }
+    public void Update(bool isPressed, bool isInsideArea) => Api.ButtonState_Update.Invoke(InternalObj, isPressed, isInsideArea);
   }
 }

@@ -1,5 +1,4 @@
 using System;
-using Sandbox.Game.Entities;
 using Sandbox.Game.GameSystems.TextSurfaceScripts;
 using Sandbox.ModAPI;
 using VRage.Game;
@@ -36,16 +35,14 @@ namespace Lima
 
     public void Init()
     {
-      if (!GameSession.Instance.Api.IsReady)
+      if (!GameExampleSession.Instance.Api.IsReady)
         return;
 
       if (_init)
         return;
       _init = true;
 
-      _app = new SampleApp();
-      _app.InitApp(this.Block as MyCubeBlock, this.Surface as IMyTextSurface);
-      _app.CreateElements();
+      _app = new SampleApp(_block, _surface);
       _app.Theme.Scale = Math.Min(Math.Max(Math.Min(this.Surface.SurfaceSize.X, this.Surface.SurfaceSize.Y) / 512, 0.4f), 2);
       _app.Cursor.Scale = _app.Theme.Scale;
 
@@ -85,7 +82,6 @@ namespace Lima
         {
           _app.ForceUpdate();
           frame.AddRange(_app.GetSprites());
-          frame.Dispose();
         }
       }
       catch (Exception e)
