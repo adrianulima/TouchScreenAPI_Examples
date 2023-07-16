@@ -110,13 +110,6 @@ namespace Lima
         _customCursor.Position = _screen.CursorPosition;
     }
 
-    int ClampAngle(int angle)
-    {
-      angle = angle % 360;
-      if (angle < 0) angle += 360;
-      return angle;
-    }
-
     public override void Run()
     {
       try
